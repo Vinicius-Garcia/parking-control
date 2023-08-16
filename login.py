@@ -23,7 +23,7 @@ def login():
 
     if user:
         rt.destroy()  # Fecha a janela de login
-        os.system("python control.py")  # Abre a tela de controle
+        os.system("python menu.py")  # Abre a tela de controle
     else:
         label_status.config(text="Login failed. Please try again.")
 
