@@ -105,24 +105,24 @@ def open_entry_details(selected_item):
         details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Data: {formatted_time}", font=("Roboto", 16), anchor='w')
         details_label.pack(pady=6, padx=10, anchor="w")
 
-        button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET", command=print_entry)
+        button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET", command=lambda: print_entry(selected_entry, formatted_time))
         button.pack(pady=12, padx=10)
 
 
-# Function to print the selected entry details
-def print_entry():
+def print_entry(placa, data):
     print('teste')
     try:
         font = {
              "height": 8,
         }
         with Printer(linegap=1) as printer:
-            printer.text('placa', font_config=font)
-            printer.text('data', font_config=font)
+            printer.text(f'Placa: {placa}', font_config=font)
+            printer.text(f'Data: {data}', font_config=font)
 
         messagebox.showinfo("Print", "Entry details printed successfully!")
     except Exception as e:
         print("Printing error:", e)
+
 
 def update_entry_list():
     try:
