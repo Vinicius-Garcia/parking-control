@@ -1,44 +1,60 @@
-import tkinter as tk
+import customtkinter
 import os
+import sqlite3
+
+
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("dark-blue")
+
+rt = customtkinter.CTk()
+rt.geometry("600x520")
 
 # Funções para os botões
 def open_entrada():
-    os.system("python entrada.py")
+    os.system("python entry.py")
 
 def open_saida():
-    os.system("python saida.py")
+    os.system("python exit.py")
 
 def open_patio():
-    os.system("python patio.py")
+    os.system("python lot.py")
 
 def open_relatorio():
-    os.system("python relatorio.py")
+    os.system("python report.py")
 
 def open_config():
     os.system("python config.py")
 
-# Cria a janela principal
-root = tk.Tk()
-root.geometry("800x600")
-root.title("Sistema de Estacionamento")
+def logout():
+    rt.destroy()
+    os.system("python login.py")
 
-# Criação do título
-title_label = tk.Label(master=root, text="Menu", font=("Roboto", 24))
-title_label.pack(pady=20)
 
-# Criação dos botões com tamanho maior
-button_entrada = tk.Button(master=root, text="Entrada", width=20, height=3, command=open_entrada)
-button_saida = tk.Button(master=root, text="Saída", width=20, height=3, command=open_saida)
-button_patio = tk.Button(master=root, text="Pátio", width=20, height=3, command=open_patio)
-button_relatorio = tk.Button(master=root, text="Relatório", width=20, height=3, command=open_relatorio)
-button_config = tk.Button(master=root, text="Configurações", width=20, height=3, command=open_config)
+fr = customtkinter.CTkFrame(master=rt)
+fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-# Posicionamento dos botões
-button_entrada.pack(pady=10)
-button_saida.pack(pady=10)
-button_patio.pack(pady=10)
-button_relatorio.pack(pady=10)
-button_config.pack(pady=10)
+label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="Main Menu", font=("Roboto", 24))
+label.pack(pady=12, padx=10)
+
+button1 = customtkinter.CTkButton(master=fr, width=240, height=32, text="DAR ENTRADA", command=open_entrada)
+button1.pack(pady=12, padx=10)
+
+button2 = customtkinter.CTkButton(master=fr, width=240, height=32, text="DAR SAÍDA", command=open_saida)
+button2.pack(pady=12, padx=10)
+
+button3 = customtkinter.CTkButton(master=fr, width=240, height=32, text="PÁTIO", command=open_patio)
+button3.pack(pady=12, padx=10)
+
+button4 = customtkinter.CTkButton(master=fr, width=240, height=32, text="RELATÓRIO", command=open_relatorio)
+button4.pack(pady=12, padx=10)
+
+button5 = customtkinter.CTkButton(master=fr, width=240, height=32, text="CONFIGURAÇÃO", command=open_config)
+button5.pack(pady=12, padx=10)
+
+button6 = customtkinter.CTkButton(master=fr, width=240, height=32, text="LOGOUT",fg_color='#91403d', command=logout)
+button6.pack(pady=12, padx=10)
+
+
 
 # Inicia a aplicação
-root.mainloop()
+rt.mainloop()
