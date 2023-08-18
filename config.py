@@ -4,6 +4,8 @@ from tkinter import messagebox
 import sqlite3
 
 # Função para abrir a janela de lista de usuários
+def add_user():
+        print('aqui')
 
 
 def users():
@@ -11,6 +13,45 @@ def users():
     user_window.title("Lista de Usuários")
     user_window.geometry("400x450")
     user_window.configure(bg="#212121")
+
+    button_add = customtkinter.CTkButton(
+    user_window, width=240, height=32, text="ADICIONAR USUÁRIO", command=add_user)
+    button_add.pack(pady=12, padx=10)
+
+    listbox = tk.Listbox(user_window, width=480, height=200)
+    listbox.pack(pady=12, padx=10)
+
+    user_list()
+
+    def user_list():
+     try:
+        conn = sqlite3.connect('user_data.db')
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT placa, data FROM entry")
+        entries = cursor.fetchall()
+        
+        listbox.delete(0, tk.END)  # Clear the current list
+        
+        for entry in entries:
+            entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
+            listbox.insert(tk.END, entry_str)
+        
+        conn.close()
+        
+        # Unbind the previous event bindings
+        listbox.unbind("<ButtonRelease-1>")
+        
+        # Bind a new event handler to open details for the clicked item
+        listbox.bind("<ButtonRelease-1>", lambda event: open_entry_details(listbox.get(listbox.curselection())))
+    except sqlite3.Error as e:
+        print("SQLite error:", e)
+
+    
+
+
+
+
 
 
 customtkinter.set_appearance_mode("dark")

@@ -17,7 +17,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 rt = customtkinter.CTk()
-rt.geometry("1200x600")
+rt.geometry("900x600")
 
 def update_entry_list():
     try:
@@ -100,16 +100,16 @@ def export_excel():
         print("Erro ao exportar para Excel:", e)
 
 fr = customtkinter.CTkFrame(master=rt)
-fr.pack(pady=40, padx=120, fill="both", expand=True)
+fr.grid(row=0, column=0, padx=120, pady=40, sticky="nsew")
 
 label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="RELATÓRIO", font=("Roboto", 24))
-label.pack(pady=12, padx=10)
+label.grid(row=0, column=0, pady=12, padx=10, columnspan=2)
 
-button = customtkinter.CTkButton(master=fr, width=240, height=32, text="EXPORTAR PDF", command=export_pdf)
-button.pack(pady=12, padx=10)
+button = customtkinter.CTkButton(master=fr, width=240, height=40, text="EXPORTAR PDF", command=export_pdf)
+button.grid(row=1, column=0, padx=10, pady=10)
 
-button1 = customtkinter.CTkButton(master=fr, width=240, height=32, text="EXPORTAR EXCEL", command=export_excel)
-button1.pack(pady=12, padx=10)
+button1 = customtkinter.CTkButton(master=fr, width=240, height=40, text="EXPORTAR EXCEL", command=export_excel)
+button1.grid(row=1, column=1, padx=10, pady=10)
 
 tree = tk.ttk.Treeview(master=fr, columns=("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago"))
 tree['show'] = 'headings'
@@ -120,13 +120,13 @@ tree.heading("#4", text="Tempo de Permanência")
 tree.heading("#5", text="Valor Pago")
 
 # Set column widths
-tree.column("#1", width=40)
+tree.column("#1", width=100)
 tree.column("#2", width=150)
 tree.column("#3", width=150)
 tree.column("#4", width=150)
 tree.column("#5", width=150)
 
-tree.pack(pady=12, padx=10, fill="both", expand=True)
+tree.grid(row=2, column=0, columnspan=2, padx=10, pady=12, sticky="nsew")
 
 update_entry_list()
 

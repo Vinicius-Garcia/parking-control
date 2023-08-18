@@ -6,7 +6,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 rt = customtkinter.CTk()
-rt.geometry("600x450")
+rt.geometry("600x550")
 
 def add_to_database():
     conn = sqlite3.connect("user_data.db")
@@ -45,25 +45,25 @@ def switch_to_login_screen():
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=30, padx=120, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=fr, width=120, height=4, text="Register System")
+label = customtkinter.CTkLabel(master=fr, width=300, height=40,font=("Roboto", 36), text="Cadastrar Usuário")
 label.pack(pady=12, padx=10)
 
-firstname = customtkinter.CTkEntry(master=fr, width=240, height=4, placeholder_text="Nome Completo")
+firstname = customtkinter.CTkEntry(master=fr, width=300, height=40, placeholder_text="Nome Completo")
 firstname.pack(pady=12, padx=10)
 
-entry1 = customtkinter.CTkEntry(master=fr, width=240, height=4, placeholder_text="Usuário")
+entry1 = customtkinter.CTkEntry(master=fr, width=300, height=40, placeholder_text="Usuário")
 entry1.pack(pady=12, padx=10)
 
-entry2 = customtkinter.CTkEntry(master=fr, width=240, height=4, placeholder_text="Senha", show="*")
+entry2 = customtkinter.CTkEntry(master=fr, width=300, height=40, placeholder_text="Senha", show="*")
 entry2.pack(pady=12, padx=10)
 
-combo = customtkinter.CTkComboBox(master=fr, width=240, height=4, values=["OPERADOR", "GERENTE"])
+combo = customtkinter.CTkComboBox(master=fr, width=300, height=40, values=["OPERADOR", "GERENTE"])
 combo.pack(pady=12, padx=10)
 
-button = customtkinter.CTkButton(master=fr, width=240, height=24, text="CADASTRAR", command=reg)
+button = customtkinter.CTkButton(master=fr, width=300, height=40, text="CADASTRAR", command=reg)
 button.pack(pady=12, padx=24)
 
-button1 = customtkinter.CTkButton(master=fr, width=240, height=24, text="CANCELAR", fg_color='#91403d', command=switch_to_login_screen)
+button1 = customtkinter.CTkButton(master=fr, width=300, height=40, text="CANCELAR", fg_color='#91403d', command=switch_to_login_screen)
 button1.pack(pady=12, padx=10)
 
 

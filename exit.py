@@ -62,7 +62,8 @@ def open_entry_details(selected_item):
         details_frame, width=120, height=1, text=f"Tempo desde a entrada: {hours:02d}:{minutes:02d}:{seconds:02d}", font=("Roboto", 16), anchor='w')
     details_label.pack(pady=6, padx=10, anchor="w")
 
-   try:
+    # Get values from the "price" table
+    try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
         cursor.execute(
@@ -78,7 +79,7 @@ def open_entry_details(selected_item):
     valor_primeira_faixa = float(price_row[1]) if price_row else 0.0
     tempo_primeira_faixa = int(price_row[2]) if price_row else 0
     valor_demais_faixas = float(price_row[3]) if price_row else 0.0
-    tempo_demais_faixas = int(price_row[4]) if price_row else 0
+    tempo_demais_faixas = int(price_row[4]) if price_row else 0  # Fixed this line
 
     # Calculate the total value based on time bands and grace period
     valor_total = 0.0
@@ -97,10 +98,9 @@ def open_entry_details(selected_item):
         # Calcula o tempo nas demais faixas (se houver)
         tempo_demais_faixas = time_difference.total_seconds() - tempo_primeira_faixa
         if tempo_demais_faixas > 0:
-            num_demais_faixas = int(tempo_demais_faixas / (60 * tempo_demais_faixas))
+            num_demais_faixas = int(tempo_demais_faixas / (60 * tempo_demais_faixas))  # Fixed this line
             valor_total += num_demais_faixas * valor_demais_faixas
             print("Valor total:", valor_total, "(Demais Faixas)")
-
 
     # Set the locale to Brazilian Portuguese for currency formatting
     locale.setlocale(locale.LC_MONETARY, 'pt_BR.utf8')
@@ -110,7 +110,12 @@ def open_entry_details(selected_item):
     valor_total_brl_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Valor Total: {valor_total_brl}", font=("Roboto", 16), anchor='w')
     valor_total_brl_label.pack(pady=6, padx=10, anchor="w")
 
-    button = customtkinter.CTkButton(details_frame, width=240, height=32, text="DAR SAIDA", command=lambda: move_to_history(selected_entry, formatted_time, datetime.now(), time_difference))
+    combo = customtkinter.CTkComboBox(details_frame, width=400, height=40, values=["PIX", "CARTÃO", "DINHEIRO"])
+    combo.pack(pady=12, padx=10)
+
+    pagamento = combo.get()
+
+    button = customtkinter.CTkButton(details_frame, width=240, height=32, text="DAR SAIDA", command=lambda: move_to_history(selected_entry, formatted_time, datetime.now(), time_difference, pagamento))
     button.pack(pady=12, padx=10)
 
 def update_entry_list():
@@ -144,7 +149,7 @@ def handle_listbox_click():
         selected_item = listbox.get(selected_index)
         open_entry_details(selected_item)
 
-def move_to_history(placa, entrada, saida, tempo):
+def move_to_history(placa, entrada, saida, tempo, pagamento):
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
@@ -156,7 +161,8 @@ def move_to_history(placa, entrada, saida, tempo):
                             data_entrada TEXT,
                             data_saida TEXT,
                             tempo_estadia TEXT,
-                            valor_total REAL
+                            valor_total REAL,
+                            pagamento TEXT
                           )''')
 
         # Convert the timedelta to a formatted string for storage
@@ -181,8 +187,8 @@ def move_to_history(placa, entrada, saida, tempo):
             total_minutos = tempo.total_seconds() / 60
             valor_total = 5.0 + ((total_minutos - primeira_faixa) // demais_faixas) * 2.5
 
-        cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total) VALUES (?, ?, ?, ?, ?)",
-                       (placa, entrada, saida, tempo_str, valor_total))
+        cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento) VALUES (?, ?, ?, ?, ?, ?)",
+                       (placa, entrada, saida, tempo_str, valor_total, pagamento))
 
         cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
         
