@@ -41,26 +41,30 @@ def switch_to_login_screen():
     rt.destroy()
     os.system("python login.py")
 
+
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=30, padx=120, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=fr, width=120, height=2, text="Register System")
+label = customtkinter.CTkLabel(master=fr, width=120, height=4, text="Register System")
 label.pack(pady=12, padx=10)
 
-firstname = customtkinter.CTkEntry(master=fr, width=240, height=2, placeholder_text="Full name")
+firstname = customtkinter.CTkEntry(master=fr, width=240, height=4, placeholder_text="Nome Completo")
 firstname.pack(pady=12, padx=10)
 
-entry1 = customtkinter.CTkEntry(master=fr, width=240, height=2, placeholder_text="Username")
+entry1 = customtkinter.CTkEntry(master=fr, width=240, height=4, placeholder_text="Usuário")
 entry1.pack(pady=12, padx=10)
 
-entry2 = customtkinter.CTkEntry(master=fr, width=240, height=2, placeholder_text="Password", show="*")
+entry2 = customtkinter.CTkEntry(master=fr, width=240, height=4, placeholder_text="Senha", show="*")
 entry2.pack(pady=12, padx=10)
 
-combo = customtkinter.CTkComboBox(master=fr, width=240, height=2, values=["OPERADOR", "GERENTE"])
+combo = customtkinter.CTkComboBox(master=fr, width=240, height=4, values=["OPERADOR", "GERENTE"])
 combo.pack(pady=12, padx=10)
 
-button = customtkinter.CTkButton(master=fr, width=240, height=2, text="Register", command=reg)
-button.pack(pady=12, padx=10)
+button = customtkinter.CTkButton(master=fr, width=240, height=24, text="CADASTRAR", command=reg)
+button.pack(pady=12, padx=24)
+
+button1 = customtkinter.CTkButton(master=fr, width=240, height=24, text="CANCELAR", fg_color='#91403d', command=switch_to_login_screen)
+button1.pack(pady=12, padx=10)
 
 
 rt.mainloop()

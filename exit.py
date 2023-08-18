@@ -106,14 +106,34 @@ def move_to_history(placa, entrada, saida, tempo):
                             placa TEXT,
                             data_entrada TEXT,
                             data_saida TEXT,
-                            tempo_estadia TEXT
+                            tempo_estadia TEXT,
+                            valor_total REAL
                           )''')
 
         # Convert the timedelta to a formatted string for storage
         tempo_str = str(tempo)
 
-        cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia) VALUES (?, ?, ?, ?)",
-                       (placa, entrada, saida, tempo_str))
+        # Get values from the "price" table
+        cursor.execute("SELECT carencia, primeira_faixa, demais_faixas FROM price LIMIT 1")
+        price_row = cursor.fetchone()
+
+        carencia = int(price_row[0]) if price_row else 0
+        primeira_faixa = float(price_row[1]) if price_row else 0.0  # Use float instead of int
+        demais_faixas = int(price_row[2]) if price_row else 0
+
+        # Calculate the total value based on time bands and grace period
+        valor_total = 0.0
+
+        if tempo.total_seconds() <= carencia * 60:
+            valor_total = 0.0
+        elif tempo.total_seconds() <= primeira_faixa * 60:
+            valor_total = 5.0
+        else:
+            total_minutos = tempo.total_seconds() / 60
+            valor_total = 5.0 + ((total_minutos - primeira_faixa) // demais_faixas) * 2.5
+
+        cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total) VALUES (?, ?, ?, ?, ?)",
+                       (placa, entrada, saida, tempo_str, valor_total))
 
         cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
         
@@ -121,7 +141,6 @@ def move_to_history(placa, entrada, saida, tempo):
         conn.close()
     except sqlite3.Error as e:
         print("SQLite error:", e)
-
 
 # Create the tkinter frame and widgets
 fr = customtkinter.CTkFrame(master=rt)
