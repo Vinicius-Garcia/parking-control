@@ -4,6 +4,8 @@ from tkinter import messagebox
 import sqlite3
 
 # Função para abrir a janela de lista de usuários
+
+
 def users():
     user_window = tk.Toplevel(rt)
     user_window.title("Lista de Usuários")
@@ -24,41 +26,51 @@ button_users = customtkinter.CTkButton(
     master=fr, width=240, height=32, text="USUÁRIOS", command=users)
 button_users.pack(pady=12, padx=10)
 
+
 def price():
     def insert_price():
         try:
             carencia_val = carencia_entry.get()
             primeira_faixa_val = primeira_faixa_entry.get()
             demais_faixas_val = demais_faixas_entry.get()
+            primeira_faixa_min_val = primeira_faixa_min_entry.get()
+            demais_faixas_min_val = demais_faixas_min_entry.get()
+            print(carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,  demais_faixas_val)
 
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
-
             cursor.execute('''CREATE TABLE IF NOT EXISTS price (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 carencia TEXT,
                                 primeira_faixa TEXT,
-                                demais_faixas TEXT
+                                primeira_faixa_min TEXT,
+                                demais_faixas TEXT,
+                                demais_faixas_min TEXT
                             )''')
 
             cursor.execute("SELECT * FROM price LIMIT 1")
             row = cursor.fetchone()
 
             if row:
-                cursor.execute("UPDATE price SET carencia=?, primeira_faixa=?, demais_faixas=? WHERE id=?", 
-                                (carencia_val, primeira_faixa_val, demais_faixas_val, row[0]))
-                messagebox.showinfo("Sucesso", "Valores da tabela de preço atualizados com sucesso!")
+                cursor.execute("UPDATE price SET carencia=?, primeira_faixa=?, primeira_faixa_min=?,demais_faixas_min=?, demais_faixas=? WHERE id=?",
+                               (carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,  demais_faixas_val, row[0]))
+                messagebox.showinfo(
+                    "Sucesso", "Valores da tabela de preço atualizados com sucesso!")
+                price_window.destroy()    
             else:
-                cursor.execute("INSERT INTO price (carencia, primeira_faixa, demais_faixas) VALUES (?, ?, ?)",
-                                (carencia_val, primeira_faixa_val, demais_faixas_val))
-                messagebox.showinfo("Sucesso", "Valores inseridos na tabela de preço com sucesso!")
+                cursor.execute("INSERT INTO price (carencia, primeira_faixa,primeira_faixa_min,demais_faixas_min,  demais_faixas) VALUES (?, ?, ?, ? , ?)",
+                               (carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,  demais_faixas_val))
+                messagebox.showinfo(
+                    "Sucesso", "Valores inseridos na tabela de preço com sucesso!")
+                price_window.destroy()
 
             conn.commit()
             conn.close()
 
         except sqlite3.Error as e:
+            print("aqui")
             print("SQLite error:", e)
-            
+
     def populate_entries():
         try:
             conn = sqlite3.connect('user_data.db')
@@ -70,16 +82,19 @@ def price():
             if row:
                 carencia_entry.insert(0, row[1])
                 primeira_faixa_entry.insert(0, row[2])
-                demais_faixas_entry.insert(0, row[3])
+                primeira_faixa_min_entry.insert(0, row[3])
+                demais_faixas_entry.insert(0, row[4])
+                demais_faixas_min_entry.insert(0, row[5])
 
             conn.close()
 
         except sqlite3.Error as e:
+            
             print("SQLite error:", e)
 
     price_window = tk.Toplevel(rt)
     price_window.title("Tabela de Preço")
-    price_window.geometry("400x300")
+    price_window.geometry("400x500")
     price_window.configure(bg="#212121")
 
     carencia_label = customtkinter.CTkLabel(
@@ -89,15 +104,29 @@ def price():
     carencia_entry = customtkinter.CTkEntry(price_window, width=240)
     carencia_entry.pack(pady=6, padx=10)
 
+    primeira_faixa_min_label = customtkinter.CTkLabel(
+        price_window, width=240, height=1, text="Tempo da Primeira Faixa(em minutos):")
+    primeira_faixa_min_label.pack(pady=6, padx=10)
+
+    primeira_faixa_min_entry = customtkinter.CTkEntry(price_window, width=240)
+    primeira_faixa_min_entry.pack(pady=6, padx=10)
+
     primeira_faixa_label = customtkinter.CTkLabel(
-        price_window, width=240, height=1, text="Primeira Faixa:")
+        price_window, width=240, height=1, text="Valor da Primeira Faixa:")
     primeira_faixa_label.pack(pady=6, padx=10)
 
     primeira_faixa_entry = customtkinter.CTkEntry(price_window, width=240)
     primeira_faixa_entry.pack(pady=6, padx=10)
 
+    demais_faixas_min_label = customtkinter.CTkLabel(
+        price_window, width=240, height=1, text="Tempo das Demais Faixa(em minutos):")
+    demais_faixas_min_label.pack(pady=6, padx=10)
+
+    demais_faixas_min_entry = customtkinter.CTkEntry(price_window, width=240)
+    demais_faixas_min_entry.pack(pady=6, padx=10)
+
     demais_faixas_label = customtkinter.CTkLabel(
-        price_window, width=240, height=1, text="Demais Faixas:")
+        price_window, width=240, height=1, text="Valor das Demais Faixas:")
     demais_faixas_label.pack(pady=6, padx=10)
 
     demais_faixas_entry = customtkinter.CTkEntry(price_window, width=240)
@@ -109,8 +138,6 @@ def price():
 
     populate_entries()
 
-
-    
 
 # Botão para abrir a janela de tabela de preço
 button_price = customtkinter.CTkButton(

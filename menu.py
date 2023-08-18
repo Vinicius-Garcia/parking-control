@@ -1,7 +1,10 @@
 import customtkinter
 import os
 import sqlite3
+import sys
 
+print("User type:", sys.argv[1] )
+user_type = sys.argv[1] if len(sys.argv) > 1 else None
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -20,10 +23,18 @@ def open_patio():
     os.system("python lot.py")
 
 def open_relatorio():
-    os.system("python report.py")
+    if user_type == "GERENTE":
+        os.system("python report.py")
+    else:
+        # Mostrar uma mensagem ou desabilitar o botão de relatório para usuários não autorizados
+        button4.configure(state="disabled")  # Desabilita o botão de relatório
 
 def open_config():
-    os.system("python config.py")
+    if user_type == "GERENTE":
+        os.system("python config.py")
+    else:
+        # Mostrar uma mensagem ou desabilitar o botão de configuração para usuários não autorizados
+        button5.configure(state="disabled")  # Desabilita o botão de configuração
 
 def logout():
     rt.destroy()
@@ -50,6 +61,11 @@ button4.pack(pady=12, padx=10)
 
 button5 = customtkinter.CTkButton(master=fr, width=240, height=32, text="CONFIGURAÇÃO", command=open_config)
 button5.pack(pady=12, padx=10)
+
+if user_type != "GERENTE":
+    print(user_type)
+    button4.configure(state="disabled")
+    button5.configure(state="disabled")
 
 button6 = customtkinter.CTkButton(master=fr, width=240, height=32, text="LOGOUT",fg_color='#91403d', command=logout)
 button6.pack(pady=12, padx=10)

@@ -20,10 +20,11 @@ def login():
     user = cursor.fetchone()
 
     conn.close()
+    user_type  = user[4]
 
     if user:
         rt.destroy()  # Fecha a janela de login
-        os.system("python menu.py")  # Abre a tela de controle
+        os.system(f"python menu.py {user_type} ")  # Abre a tela de controle
     else:
         label_status.config(text="Login failed. Please try again.")
 
