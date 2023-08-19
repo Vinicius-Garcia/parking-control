@@ -1,13 +1,11 @@
 import customtkinter
-import os
 import sqlite3
 from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox
 import locale
-import qrcode
-from PIL import Image, ImageTk
-from win32printing import Printer
+import math
+
 
 
 customtkinter.set_appearance_mode("dark")
@@ -67,40 +65,47 @@ def open_entry_details(selected_item):
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT carencia, primeira_faixa, primeira_faixa_min, demais_faixas, demais_faixas_min FROM price LIMIT 1")
+            "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
         price_row = cursor.fetchone()
         conn.close()
     except sqlite3.Error as e:
         print("SQLite error:", e)
         price_row = None
 
-    tempo_carencia = int(price_row[0]) if price_row else 0
-    # Use float instead of int
-    valor_primeira_faixa = float(price_row[1]) if price_row else 0.0
-    tempo_primeira_faixa = int(price_row[2]) if price_row else 0
-    valor_demais_faixas = float(price_row[3]) if price_row else 0.0
-    tempo_demais_faixas = int(price_row[4]) if price_row else 0  # Fixed this line
+    tempo_str = str(time_difference)
 
+    carencia = int(price_row[0]) if price_row else 0
+    primeira_faixa = float(price_row[1]) if price_row else 0.0  # Use float instead of int
+    demais_faixas = int(price_row[2]) if price_row else 0
+    tempo_primeira_faixa = int(price_row[3]) if price_row else 0
+    tempo_demais_faixas = int(price_row[4]) if price_row else 0
+
+    print("Carencia:", carencia)
+    print("Primeira Faixa:", primeira_faixa)
+    print("Demais Faixas:", demais_faixas)
+    print("Tempo Primeira Faixa:", tempo_primeira_faixa)
+    print("Tempo Demais Faixas:", tempo_demais_faixas)
+
+    print("Tempo:", (time_difference.total_seconds() / 60))
     # Calculate the total value based on time bands and grace period
     valor_total = 0.0
-
-    if time_difference.total_seconds() <= tempo_carencia * 60:
+    total_minutos = time_difference.total_seconds() / 60
+    if total_minutos <= carencia * 60:
         valor_total = 0.0
-        print("Valor total: 0.0 (Carência)")
-    elif time_difference.total_seconds() <= tempo_primeira_faixa * 60:
-        valor_total = valor_primeira_faixa
-        print("Valor total:", valor_total, "(Primeira Faixa)")
     else:
-        # Calcula o tempo na primeira faixa
-        tempo_primeira_faixa = tempo_primeira_faixa * 60
-        valor_total += valor_primeira_faixa
+        if total_minutos <= tempo_primeira_faixa:
+            valor_total = primeira_faixa
+        else:
+            valor_total += primeira_faixa
 
-        # Calcula o tempo nas demais faixas (se houver)
-        tempo_demais_faixas = time_difference.total_seconds() - tempo_primeira_faixa
-        if tempo_demais_faixas > 0:
-            num_demais_faixas = int(tempo_demais_faixas / (60 * tempo_demais_faixas))  # Fixed this line
-            valor_total += num_demais_faixas * valor_demais_faixas
-            print("Valor total:", valor_total, "(Demais Faixas)")
+            total_minutos = total_minutos - tempo_primeira_faixa
+            if total_minutos > 0:
+                total_minutos = total_minutos / tempo_demais_faixas
+                total_minutos_ceiled = math.ceil(total_minutos)
+                valor_total += total_minutos_ceiled * demais_faixas
+                print("Valor total:", valor_total, "(Demais Faixas)")
+
+    print("Valor Total:", valor_total)
 
     # Set the locale to Brazilian Portuguese for currency formatting
     locale.setlocale(locale.LC_MONETARY, 'pt_BR.utf8')
@@ -169,28 +174,46 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
         tempo_str = str(tempo)
 
         # Get values from the "price" table
-        cursor.execute("SELECT carencia, primeira_faixa, demais_faixas FROM price LIMIT 1")
+        cursor.execute("SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
         price_row = cursor.fetchone()
 
         carencia = int(price_row[0]) if price_row else 0
         primeira_faixa = float(price_row[1]) if price_row else 0.0  # Use float instead of int
         demais_faixas = int(price_row[2]) if price_row else 0
+        tempo_primeira_faixa = int(price_row[3]) if price_row else 0
+        tempo_demais_faixas = int(price_row[4]) if price_row else 0
 
+        print("Carencia:", carencia)
+        print("Primeira Faixa:", primeira_faixa)
+        print("Demais Faixas:", demais_faixas)
+        print("Tempo Primeira Faixa:", tempo_primeira_faixa)
+        print("Tempo Demais Faixas:", tempo_demais_faixas)
+
+        print("Tempo:", (tempo.total_seconds() / 60))
         # Calculate the total value based on time bands and grace period
         valor_total = 0.0
-
-        if tempo.total_seconds() <= carencia * 60:
+        total_minutos = tempo.total_seconds() / 60
+        if total_minutos <= carencia * 60:
             valor_total = 0.0
-        elif tempo.total_seconds() <= primeira_faixa * 60:
-            valor_total = 5.0
         else:
-            total_minutos = tempo.total_seconds() / 60
-            valor_total = 5.0 + ((total_minutos - primeira_faixa) // demais_faixas) * 2.5
+            if total_minutos <= tempo_primeira_faixa:
+                valor_total = primeira_faixa
+            else:
+                valor_total += primeira_faixa
+
+                total_minutos = total_minutos - tempo_primeira_faixa
+                if total_minutos > 0:
+                    total_minutos = total_minutos / tempo_demais_faixas
+                    total_minutos_ceiled = math.ceil(total_minutos)
+                    valor_total += total_minutos_ceiled * demais_faixas
+                    print("Valor total:", valor_total, "(Demais Faixas)"   )
+
+        print("Valor Total:", valor_total)
 
         cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento) VALUES (?, ?, ?, ?, ?, ?)",
                        (placa, entrada, saida, tempo_str, valor_total, pagamento))
 
-        cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
+        #cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
         
         conn.commit()
         conn.close()

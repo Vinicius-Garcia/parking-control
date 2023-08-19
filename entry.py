@@ -6,8 +6,9 @@ import tkinter as tk
 from tkinter import messagebox
 import locale
 import qrcode
-from PIL import Image, ImageTk
-from win32printing import Printer
+from PIL import Image, ImageTk, ImageWin
+import win32print
+import win32ui
 
 
 
@@ -36,7 +37,7 @@ def plate_exists(placa):
 # Function to insert an entry into the database
 def send_entry():
     placa = entry1.get()
-    
+
     if plate_exists(placa):
         messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
         return
@@ -44,18 +45,18 @@ def send_entry():
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
-        
+
         # Create the 'entry' table if it doesn't exist
         cursor.execute('''CREATE TABLE IF NOT EXISTS entry
                       (placa TEXT, data TEXT)''')
-        
+
         # Save placa and data in the table
         data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute("INSERT INTO entry (placa, data) VALUES (?, ?)", (placa, data_atual))
-        
+
         conn.commit()
         conn.close()
-        
+
         # Update the Listbox with the new entry
         update_entry_list()
     except sqlite3.Error as e:
@@ -92,13 +93,14 @@ def open_entry_details(selected_item):
         qr.add_data(selected_entry)
         qr.make(fit=True)
 
-        qr_img = qr.make_image(fill_color="black", back_color="white")
+        qr_img = qr.make_image(fill_color="white", back_color="black")
         qr_photo = ImageTk.PhotoImage(qr_img)
+
 
         qr_label = tk.Label(details_frame, image=qr_photo)
         qr_label.image = qr_photo
         qr_label.pack(pady=6, padx=10)
-        
+
         details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Placa: {selected_entry}", font=("Roboto", 16), anchor='w')
         details_label.pack(pady=6, padx=10, anchor="w")
 
@@ -110,39 +112,59 @@ def open_entry_details(selected_item):
 
 
 def print_entry(placa, data):
-    print('teste')
-    try:
-        font = {
-             "height": 8,
-        }
-        with Printer(linegap=1) as printer:
-            printer.text(f'Placa: {placa}', font_config=font)
-            printer.text(f'Data: {data}', font_config=font)
+    PHYSICALWIDTH = 40
+    PHYSICALHEIGHT = 40
 
-        messagebox.showinfo("Print", "Entry details printed successfully!")
-    except Exception as e:
-        print("Printing error:", e)
+    printer_name = win32print.GetDefaultPrinter()
+    file_name = "qr.png"
+
+    hDC = win32ui.CreateDC()
+    hDC.CreatePrinterDC(printer_name)
+    printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
+
+    bmp = Image.open(file_name)
+    if bmp.size[0] < bmp.size[1]:
+        bmp = bmp.rotate(90)
+
+    hDC.StartDoc(file_name)
+    hDC.StartPage()
+
+    dib = ImageWin.Dib(bmp)
+    dib.draw(hDC.GetHandleOutput(), (100, 0, printer_size[0], printer_size[1]))
+
+    # Add text alongside the image
+    placa = f"PLACA: {placa}"
+    data = f"DATA E HORA: {data}"
+    y_position = 10  # Starting vertical position
+    line_height = 15  # Adjust the vertical spacing between lines
+    hDC.TextOut(1000, 0, "TICKET")
+    hDC.TextOut(0, 200, placa)
+    hDC.TextOut(0, 400, data)
+
+    hDC.EndPage()
+    hDC.EndDoc()
+    hDC.DeleteDC()
 
 
 def update_entry_list():
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
-        
+
         cursor.execute("SELECT placa, data FROM entry")
         entries = cursor.fetchall()
-        
+
         listbox.delete(0, tk.END)  # Clear the current list
-        
+
         for entry in entries:
             entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
             listbox.insert(tk.END, entry_str)
-        
+
         conn.close()
-        
+
         # Unbind the previous event bindings
         listbox.unbind("<ButtonRelease-1>")
-        
+
         # Bind a new event handler to open details for the clicked item
         listbox.bind("<ButtonRelease-1>", lambda event: open_entry_details(listbox.get(listbox.curselection())))
     except sqlite3.Error as e:
