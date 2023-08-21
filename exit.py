@@ -30,7 +30,7 @@ def open_entry_details(selected_item):
     # Calculate the time difference
     current_time = datetime.now()
     time_difference = current_time - selected_time
-
+    print("Time Difference:", time_difference)
     # Calculate hours, minutes, and seconds
     total_seconds = int(time_difference.total_seconds())
     hours = total_seconds // 3600
@@ -80,13 +80,7 @@ def open_entry_details(selected_item):
     tempo_primeira_faixa = int(price_row[3]) if price_row else 0
     tempo_demais_faixas = int(price_row[4]) if price_row else 0
 
-    print("Carencia:", carencia)
-    print("Primeira Faixa:", primeira_faixa)
-    print("Demais Faixas:", demais_faixas)
-    print("Tempo Primeira Faixa:", tempo_primeira_faixa)
-    print("Tempo Demais Faixas:", tempo_demais_faixas)
 
-    print("Tempo:", (time_difference.total_seconds() / 60))
     # Calculate the total value based on time bands and grace period
     valor_total = 0.0
     total_minutos = time_difference.total_seconds() / 60
@@ -103,9 +97,7 @@ def open_entry_details(selected_item):
                 total_minutos = total_minutos / tempo_demais_faixas
                 total_minutos_ceiled = math.ceil(total_minutos)
                 valor_total += total_minutos_ceiled * demais_faixas
-                print("Valor total:", valor_total, "(Demais Faixas)")
 
-    print("Valor Total:", valor_total)
 
     # Set the locale to Brazilian Portuguese for currency formatting
     locale.setlocale(locale.LC_MONETARY, 'pt_BR.utf8')
@@ -119,8 +111,8 @@ def open_entry_details(selected_item):
     combo.pack(pady=12, padx=10)
 
     pagamento = combo.get()
-
-    button = customtkinter.CTkButton(details_frame, width=240, height=32, text="DAR SAIDA", command=lambda: move_to_history(selected_entry, formatted_time, datetime.now(), time_difference, pagamento))
+    formatted_saida = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    button = customtkinter.CTkButton(details_frame, width=240, height=32, text="DAR SAIDA", command=lambda: move_to_history(selected_entry, formatted_time, formatted_saida, time_difference, pagamento))
     button.pack(pady=12, padx=10)
 
 def update_entry_list():
@@ -183,13 +175,6 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
         tempo_primeira_faixa = int(price_row[3]) if price_row else 0
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
 
-        print("Carencia:", carencia)
-        print("Primeira Faixa:", primeira_faixa)
-        print("Demais Faixas:", demais_faixas)
-        print("Tempo Primeira Faixa:", tempo_primeira_faixa)
-        print("Tempo Demais Faixas:", tempo_demais_faixas)
-
-        print("Tempo:", (tempo.total_seconds() / 60))
         # Calculate the total value based on time bands and grace period
         valor_total = 0.0
         total_minutos = tempo.total_seconds() / 60
@@ -206,14 +191,12 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
                     total_minutos = total_minutos / tempo_demais_faixas
                     total_minutos_ceiled = math.ceil(total_minutos)
                     valor_total += total_minutos_ceiled * demais_faixas
-                    print("Valor total:", valor_total, "(Demais Faixas)"   )
 
-        print("Valor Total:", valor_total)
 
         cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento) VALUES (?, ?, ?, ?, ?, ?)",
                        (placa, entrada, saida, tempo_str, valor_total, pagamento))
 
-        #cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
+        cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
         
         conn.commit()
         conn.close()
