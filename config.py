@@ -81,41 +81,34 @@ def users():
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
 
-            cursor.execute("SELECT id, full_name, username, password, role FROM users")
+            cursor.execute("SELECT full_name, username, password, role FROM users")
             users = cursor.fetchall()
-
-            listbox.delete(0, tk.END)  # Clear the current list
-
+            tree.delete(*tree.get_children())
             for user in users:
-                user_str = f"ID: {user[0]} - Nome: {user[1]} - Usuário: {user[2]} - Senha: {user[3]} - Permissão: {user[4]}"
-                listbox.insert(tk.END, user_str)
+                tree.insert('', tk.END, values=(user[0], user[1], user[2], user[3]))
 
             conn.close()
 
             # Unbind the previous event bindings
-            listbox.unbind("<ButtonRelease-1>")
-
-            # Bind a new event handler to open details for the clicked item
-            listbox.bind("<ButtonRelease-1>", lambda event: open_users_details(listbox.get(listbox.curselection())))
         except sqlite3.Error as e:
             print("SQLite error:", e)
 
-    def open_users_details(selected_item):
+    def open_users_details(event):
+        selected_item = tree.selection()[0]  # Get the selected item's ID
+        selected_entry = tree.item(selected_item, "values")
         details_window = tk.Toplevel(rt)
         details_window.title("Users Detail")
         details_window.geometry("400x450")
         details_window.configure(bg="#212121")
         print(selected_item)
         # Get the selected entry details
-        selected_id = selected_item.split(" - ")[0].split(": ")[1]
-        print(selected_id)
-        selected_full_name = selected_item.split(" - ")[1].split(": ")[1]
+        selected_full_name = selected_entry[0]
         print(selected_full_name)
-        selected_username = selected_item.split(" - ")[2].split(": ")[1]
+        selected_username = selected_entry[1]
         print(selected_username)
-        selected_password = selected_item.split(" - ")[3].split(": ")[1]
+        selected_password = selected_entry[2]
         print(selected_password)
-        selected_role = selected_item.split(" - ")[4].split(": ")[1]
+        selected_role =selected_entry[3]
         print(selected_role)
 
         def cancel():
@@ -177,10 +170,30 @@ def users():
         user_window, width=240, height=32, text="ADICIONAR USUÁRIO", command=add_user)
     button_add.pack(pady=12, padx=10)
 
-    listbox = tk.Listbox(user_window, width=300, height=200)
-    listbox.pack(pady=12, padx=10)
+    tree = tk.ttk.Treeview(user_window,
+                           columns=("Nome", "Usuário", "Senha", "Permissão"))
+    tree['show'] = 'headings'
+    tree.heading("#1", text="Nome")
+    tree.heading("#2", text="Usuário")
+    tree.heading("#3", text="Senha")
+    tree.heading("#4", text="Permissão")
 
+    # Set column widths
+    tree.column("#1", width=100)
+    tree.column("#2", width=150)
+    tree.column("#3", width=100)
+    tree.column("#4", width=100)
+
+    treeScroll = tk.Scrollbar(user_window)
+    treeScroll.configure(command=tree.yview)
+    tree.configure(yscrollcommand=treeScroll.set)
+    treeScroll.pack(side='right', fill='y',padx=(0, 10), pady=10)  # Change side to 'right' and fill to 'y'
+    tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
+
+    # Call the function to update the Listbox with existing entries
     update_user_list()
+
+    tree.bind("<Double-1>", open_users_details)
 
 
 def price():
@@ -359,35 +372,32 @@ def texts():
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
 
-            cursor.execute("SELECT id, text, type FROM texts")
+            cursor.execute("SELECT  text, type,id FROM texts")
             texts = cursor.fetchall()
 
-            listbox.delete(0, tk.END)  # Clear the current list
-
+            tree.delete(*tree.get_children())
             for text in texts:
-                text_str = f"ID: {text[0]} - Text: {text[1]} - Type: {text[2]}"
-                listbox.insert(tk.END, text_str)
+
+                tree.insert('', tk.END, values=(text[0], text[1], text[2]))
 
             conn.close()
 
-            # Unbind the previous event bindings
-            listbox.unbind("<ButtonRelease-1>")
 
-            # Bind a new event handler to open details for the clicked item
-            listbox.bind("<ButtonRelease-1>", lambda event: open_texts_details(listbox.get(listbox.curselection())))
         except sqlite3.Error as e:
             print("SQLite error:", e)
 
     def open_texts_details(selected_item):
+        selected_item = tree.selection()[0]  # Get the selected item's ID
+        selected_entry = tree.item(selected_item, "values")
         details_window = tk.Toplevel(rt)
         details_window.title("Texts Detail")
         details_window.geometry("400x450")
         details_window.configure(bg="#212121")
         print(selected_item)
         # Get the selected entry details
-        selected_id = selected_item.split(" - ")[0].split(": ")[1]
-        selected_text = selected_item.split(" - ")[1].split(": ")[1]
-        selected_type = selected_item.split(" - ")[2].split(": ")[1]
+        selected_text = selected_entry[0]
+        selected_type = selected_entry[1]
+        selected_id = selected_entry[2]
 
 
         def cancel():
@@ -441,10 +451,29 @@ def texts():
         user_window, width=240, height=32, text="ADICIONAR FRASES", command=add_user)
     button_add.pack(pady=12, padx=10)
 
-    listbox = tk.Listbox(user_window, width=300, height=200)
-    listbox.pack(pady=12, padx=10)
+    tree = tk.ttk.Treeview(user_window,
+                           columns=("TEXTO", "TIPO"))
+    tree['show'] = 'headings'
+    tree.heading("#1", text="TEXTO")
+    tree.heading("#2", text="TIPO")
 
+    # Set column widths
+    tree.column("#1", width=400)
+    tree.column("#2", width=150)
+
+    treeScroll = tk.Scrollbar(user_window)
+    treeScroll.configure(command=tree.yview)
+    tree.configure(yscrollcommand=treeScroll.set)
+    treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
+    tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
+    treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
+
+    # Call the function to update the Listbox with existing entries
     update_user_list()
+
+    tree.bind("<Double-1>", open_texts_details)
+
+
 
 button_users = customtkinter.CTkButton(
     master=fr, width=240, height=32, text="USUÁRIOS", command=users)

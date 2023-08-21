@@ -8,7 +8,6 @@ customtkinter.set_default_color_theme("dark-blue")
 
 rt = customtkinter.CTk()
 rt.geometry("600x420")
-
 def login():
     username = entry1.get()
     password = entry2.get()

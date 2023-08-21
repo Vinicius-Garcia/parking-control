@@ -17,15 +17,18 @@ rt.geometry("600x600")
 
 
 def open_entry_details(selected_item):
+    selected_item = tree.selection()[0]  # Get the selected item's ID
+    selected_entry = tree.item(selected_item, "values")
     details_window = tk.Toplevel(rt)
     details_window.title("Entry Details")
     details_window.geometry("400x450")
     details_window.configure(bg="#212121")
 
+    placa = selected_entry[0]  # Assuming the first value is the "Placa"
+    data = selected_entry[1]
     # Get the selected entry details
-    selected_entry = selected_item.split(" - ")[0].split(": ")[1]
-    selected_time = datetime.strptime(selected_item.split(
-        " - ")[1].split(": ")[1], '%Y-%m-%d %H:%M:%S')
+    selected_entry = placa
+    selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
     # Calculate the time difference
     current_time = datetime.now()
@@ -84,9 +87,11 @@ def open_entry_details(selected_item):
     # Calculate the total value based on time bands and grace period
     valor_total = 0.0
     total_minutos = time_difference.total_seconds() / 60
-    if total_minutos <= carencia * 60:
+    print(total_minutos)
+    if total_minutos <= carencia:
         valor_total = 0.0
     else:
+        print(total_minutos)
         if total_minutos <= tempo_primeira_faixa:
             valor_total = primeira_faixa
         else:
@@ -122,20 +127,13 @@ def update_entry_list():
         
         cursor.execute("SELECT placa, data FROM entry")
         entries = cursor.fetchall()
-        
-        listbox.delete(0, tk.END)  # Clear the current list
-        
+
+        tree.delete(*tree.get_children())
+
         for entry in entries:
-            entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
-            listbox.insert(tk.END, entry_str)
+            tree.insert('', tk.END, values=(entry[0], entry[1]))
         
         conn.close()
-        
-        # Unbind the previous event bindings
-        listbox.unbind("<ButtonRelease-1>")
-        
-        # Bind a new event handler to open details for the clicked item
-        listbox.bind("<ButtonRelease-1>", lambda event: open_entry_details(listbox.get(listbox.curselection())))
     except sqlite3.Error as e:
         print("SQLite error:", e)
 
@@ -178,9 +176,10 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
         # Calculate the total value based on time bands and grace period
         valor_total = 0.0
         total_minutos = tempo.total_seconds() / 60
-        if total_minutos <= carencia * 60:
+        if total_minutos <= carencia:
             valor_total = 0.0
         else:
+            print(total_minutos)
             if total_minutos <= tempo_primeira_faixa:
                 valor_total = primeira_faixa
             else:
@@ -213,12 +212,33 @@ fr.pack(pady=40, padx=120, fill="both", expand=True)
 label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="DAR SAIDA", font=("Roboto", 24))
 label.pack(pady=12, padx=10)
 
-# Add a Listbox widget to display entries
-listbox = tk.Listbox(master=fr, width=480, height=200)
-listbox.pack(pady=12, padx=10)
+tree = tk.ttk.Treeview(master=fr,
+                       columns=("Placa", "Data de Entrada"))
+tree.pack(side='left')
+
+tree['show'] = 'headings'
+tree.heading("#1", text="Placa")
+tree.heading("#2", text="Data de Entrada")
+
+# Set column widths
+tree.column("#1", width=100)
+tree.column("#2", width=150)
+
+
+treeScroll = tk.Scrollbar(master=fr)
+treeScroll.configure(command=tree.yview)
+tree.configure(yscrollcommand=treeScroll.set)
+treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
+tree.pack(side='left', fill='both', expand=True, padx=(0, 10), pady=10)
+treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
+
+
+
 
 # Call the function to update the Listbox with existing entries
 update_entry_list()
+
+tree.bind("<Double-1>", open_entry_details)
 
 # Start the tkinter main loop
 rt.mainloop()

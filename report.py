@@ -31,6 +31,7 @@ def update_entry_list(start_date, end_date):
             (start_date, end_date))
         entries = cursor.fetchall()
         print(entries)
+        tree.delete(*tree.get_children())
         # Clear existing items in the Treeview
         for item in tree.get_children():
             tree.delete(item)

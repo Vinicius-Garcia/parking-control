@@ -6,9 +6,15 @@ import tkinter as tk
 from tkinter import messagebox
 import locale
 import qrcode
-from PIL import Image, ImageTk
-from win32printing import Printer
+from PIL import Image, ImageTk, ImageWin
+import win32print
+import win32ui
+from escpos.printer import Serial
+import configparser
 
+
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 
 customtkinter.set_appearance_mode("dark")
@@ -36,41 +42,47 @@ def plate_exists(placa):
 # Function to insert an entry into the database
 def send_entry():
     placa = entry1.get()
-    
-    if plate_exists(placa):
-        messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
-        return
     # Connect to the database
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
-        
+
         # Create the 'entry' table if it doesn't exist
         cursor.execute('''CREATE TABLE IF NOT EXISTS entry
                       (placa TEXT, data TEXT)''')
-        
+
+
+
+        if plate_exists(placa):
+            messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
+            return
+
         # Save placa and data in the table
-        data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         cursor.execute("INSERT INTO entry (placa, data) VALUES (?, ?)", (placa, data_atual))
-        
+
         conn.commit()
         conn.close()
-        
+
         # Update the Listbox with the new entry
         update_entry_list()
     except sqlite3.Error as e:
         print("SQLite error:", e)
 
 # Function to open a new window and display selected entry details
-def open_entry_details(selected_item):
+def open_entry_details(event):
+        selected_item = tree.selection()[0]  # Get the selected item's ID
+        selected_entry = tree.item(selected_item, "values")
         details_window = tk.Toplevel(rt)
         details_window.title("Entry Details")
         details_window.geometry("400x450")
         details_window.configure(bg="#212121")
 
-    # Get the selected entry details
-        selected_entry = selected_item.split(" - ")[0].split(": ")[1]
-        selected_time = datetime.strptime(selected_item.split(" - ")[1].split(": ")[1], '%Y-%m-%d %H:%M:%S')
+        placa = selected_entry[0]  # Assuming the first value is the "Placa"
+        data = selected_entry[1]
+        # Get the selected entry details
+        selected_entry = placa
+        selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
         # Format the selected time in Brazilian Portuguese (pt-br) format
         locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
@@ -92,13 +104,14 @@ def open_entry_details(selected_item):
         qr.add_data(selected_entry)
         qr.make(fit=True)
 
-        qr_img = qr.make_image(fill_color="black", back_color="white")
+        qr_img = qr.make_image(fill_color="white", back_color="black")
         qr_photo = ImageTk.PhotoImage(qr_img)
+
 
         qr_label = tk.Label(details_frame, image=qr_photo)
         qr_label.image = qr_photo
         qr_label.pack(pady=6, padx=10)
-        
+
         details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Placa: {selected_entry}", font=("Roboto", 16), anchor='w')
         details_label.pack(pady=6, padx=10, anchor="w")
 
@@ -110,41 +123,49 @@ def open_entry_details(selected_item):
 
 
 def print_entry(placa, data):
-    print('teste')
     try:
-        font = {
-             "height": 8,
-        }
-        with Printer(linegap=1) as printer:
-            printer.text(f'Placa: {placa}', font_config=font)
-            printer.text(f'Data: {data}', font_config=font)
+        porta = config.get("config", "porta")
+        print(porta)
+        p = Serial(devfile=porta,
+                   baudrate=9600,
+                   bytesize=8,
+                   parity='N',
+                   stopbits=1,
+                   timeout=1.00,
+                   dsrdtr=True)
 
-        messagebox.showinfo("Print", "Entry details printed successfully!")
+        p.text("TICKET\n")
+        p.qr(placa, size=4)
+        p.text(f"Placa: {placa}\n")
+        p.text(f"Data: {data}\n")
+
+        p.cut()
+
+        # Close the details_window after printing
+        details_window.destroy()
+
     except Exception as e:
-        print("Printing error:", e)
+        print(e)
+        messagebox.showerror("Erro", "Erro ao imprimir ticket")
+        return
 
 
 def update_entry_list():
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
-        
+
         cursor.execute("SELECT placa, data FROM entry")
         entries = cursor.fetchall()
-        
-        listbox.delete(0, tk.END)  # Clear the current list
-        
+        tree.delete(*tree.get_children())
+        #listbox.delete(0, tk.END)  # Clear the current list
+
         for entry in entries:
             entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
-            listbox.insert(tk.END, entry_str)
-        
+            tree.insert('', tk.END, values=(entry[0], entry[1]))
+
         conn.close()
-        
-        # Unbind the previous event bindings
-        listbox.unbind("<ButtonRelease-1>")
-        
-        # Bind a new event handler to open details for the clicked item
-        listbox.bind("<ButtonRelease-1>", lambda event: open_entry_details(listbox.get(listbox.curselection())))
+
     except sqlite3.Error as e:
         print("SQLite error:", e)
 
@@ -159,15 +180,28 @@ def handle_listbox_click():
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="PÁTIO", font=("Roboto", 24))
+label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="PÁTIO ATUAL", font=("Roboto", 24))
 label.pack(pady=12, padx=10)
 
-# Add a Listbox widget to display entries
-listbox = tk.Listbox(master=fr, width=480, height=200)
-listbox.pack(pady=12, padx=10)
+tree = tk.ttk.Treeview(master=fr,
+                       columns=("Placa", "Data de Entrada"))
+tree['show'] = 'headings'
+tree.heading("#1", text="Placa")
+tree.heading("#2", text="Data de Entrada")
+
+# Set column widths
+tree.column("#1", width=100)
+tree.column("#2", width=150)
+
+
+tree.pack(pady=12, padx=10)
+
+
 
 # Call the function to update the Listbox with existing entries
 update_entry_list()
+
+tree.bind("<Double-1>", open_entry_details)
 
 # Start the tkinter main loop
 rt.mainloop()

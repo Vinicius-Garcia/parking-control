@@ -9,7 +9,12 @@ import qrcode
 from PIL import Image, ImageTk, ImageWin
 import win32print
 import win32ui
+from escpos.printer import Serial
+import configparser
 
+
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 
 customtkinter.set_appearance_mode("dark")
@@ -18,6 +23,7 @@ customtkinter.set_default_color_theme("dark-blue")
 # Create the main tkinter window
 rt = customtkinter.CTk()
 rt.geometry("600x600")
+
 
 # Validation function for entry length
 def validate_length(P):
@@ -37,10 +43,6 @@ def plate_exists(placa):
 # Function to insert an entry into the database
 def send_entry():
     placa = entry1.get()
-
-    if plate_exists(placa):
-        messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
-        return
     # Connect to the database
     try:
         conn = sqlite3.connect('user_data.db')
@@ -50,8 +52,14 @@ def send_entry():
         cursor.execute('''CREATE TABLE IF NOT EXISTS entry
                       (placa TEXT, data TEXT)''')
 
+
+
+        if plate_exists(placa):
+            messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
+            return
+
         # Save placa and data in the table
-        data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         cursor.execute("INSERT INTO entry (placa, data) VALUES (?, ?)", (placa, data_atual))
 
         conn.commit()
@@ -63,15 +71,19 @@ def send_entry():
         print("SQLite error:", e)
 
 # Function to open a new window and display selected entry details
-def open_entry_details(selected_item):
+def open_entry_details(event):
+        selected_item = tree.selection()[0]  # Get the selected item's ID
+        selected_entry = tree.item(selected_item, "values")
         details_window = tk.Toplevel(rt)
         details_window.title("Entry Details")
         details_window.geometry("400x450")
         details_window.configure(bg="#212121")
 
-    # Get the selected entry details
-        selected_entry = selected_item.split(" - ")[0].split(": ")[1]
-        selected_time = datetime.strptime(selected_item.split(" - ")[1].split(": ")[1], '%Y-%m-%d %H:%M:%S')
+        placa = selected_entry[0]  # Assuming the first value is the "Placa"
+        data = selected_entry[1]
+        # Get the selected entry details
+        selected_entry = placa
+        selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
         # Format the selected time in Brazilian Portuguese (pt-br) format
         locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
@@ -112,38 +124,31 @@ def open_entry_details(selected_item):
 
 
 def print_entry(placa, data):
-    PHYSICALWIDTH = 40
-    PHYSICALHEIGHT = 40
+    try:
+        porta = config.get("config", "porta")
+        print(porta)
+        p = Serial(devfile=porta,
+                   baudrate=9600,
+                   bytesize=8,
+                   parity='N',
+                   stopbits=1,
+                   timeout=1.00,
+                   dsrdtr=True)
 
-    printer_name = win32print.GetDefaultPrinter()
-    file_name = "qr.png"
+        p.text("TICKET\n")
+        p.qr(placa, size=4)
+        p.text(f"Placa: {placa}\n")
+        p.text(f"Data: {data}\n")
 
-    hDC = win32ui.CreateDC()
-    hDC.CreatePrinterDC(printer_name)
-    printer_size = hDC.GetDeviceCaps(PHYSICALWIDTH), hDC.GetDeviceCaps(PHYSICALHEIGHT)
+        p.cut()
 
-    bmp = Image.open(file_name)
-    if bmp.size[0] < bmp.size[1]:
-        bmp = bmp.rotate(90)
+        # Close the details_window after printing
+        details_window.destroy()
 
-    hDC.StartDoc(file_name)
-    hDC.StartPage()
-
-    dib = ImageWin.Dib(bmp)
-    dib.draw(hDC.GetHandleOutput(), (100, 0, printer_size[0], printer_size[1]))
-
-    # Add text alongside the image
-    placa = f"PLACA: {placa}"
-    data = f"DATA E HORA: {data}"
-    y_position = 10  # Starting vertical position
-    line_height = 15  # Adjust the vertical spacing between lines
-    hDC.TextOut(1000, 0, "TICKET")
-    hDC.TextOut(0, 200, placa)
-    hDC.TextOut(0, 400, data)
-
-    hDC.EndPage()
-    hDC.EndDoc()
-    hDC.DeleteDC()
+    except Exception as e:
+        print(e)
+        messagebox.showerror("Erro", "Erro ao imprimir ticket")
+        return
 
 
 def update_entry_list():
@@ -153,20 +158,15 @@ def update_entry_list():
 
         cursor.execute("SELECT placa, data FROM entry")
         entries = cursor.fetchall()
-
-        listbox.delete(0, tk.END)  # Clear the current list
+        tree.delete(*tree.get_children())
+        #listbox.delete(0, tk.END)  # Clear the current list
 
         for entry in entries:
             entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
-            listbox.insert(tk.END, entry_str)
+            tree.insert('', tk.END, values=(entry[0], entry[1]))
 
         conn.close()
 
-        # Unbind the previous event bindings
-        listbox.unbind("<ButtonRelease-1>")
-
-        # Bind a new event handler to open details for the clicked item
-        listbox.bind("<ButtonRelease-1>", lambda event: open_entry_details(listbox.get(listbox.curselection())))
     except sqlite3.Error as e:
         print("SQLite error:", e)
 
@@ -190,12 +190,38 @@ entry1.pack(pady=12, padx=10)
 button = customtkinter.CTkButton(master=fr, width=240, height=32, text="DAR ENTRADA", command=send_entry)
 button.pack(pady=12, padx=10)
 
-# Add a Listbox widget to display entries
-listbox = tk.Listbox(master=fr, width=480, height=200)
-listbox.pack(pady=12, padx=10)
+
+tree = tk.ttk.Treeview(master=fr,
+                       columns=("Placa", "Data de Entrada"),selectmode="browse")
+
+
+tree['show'] = 'headings'
+tree.heading("#1", text="Placa")
+tree.heading("#2", text="Data de Entrada")
+
+# Set column widths
+tree.column("#1", width=100)
+tree.column("#2", width=150)
+
+
+treeScroll = tk.Scrollbar(master=fr)
+treeScroll.configure(command=tree.yview)
+tree.configure(yscrollcommand=treeScroll.set)
+treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
+tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
+treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
+
+
+
+
+
+
+
 
 # Call the function to update the Listbox with existing entries
 update_entry_list()
+
+tree.bind("<Double-1>", open_entry_details)
 
 # Start the tkinter main loop
 rt.mainloop()
