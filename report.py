@@ -18,7 +18,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 rt = customtkinter.CTk()
-rt.geometry("900x600")
+rt.after(0, lambda:rt.state('zoomed'))
 
 
 def update_entry_list(start_date, end_date):
@@ -27,7 +27,7 @@ def update_entry_list(start_date, end_date):
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total FROM history WHERE data_entrada BETWEEN ? AND ?",
+            "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento  FROM history WHERE data_entrada BETWEEN ? AND ?",
             (start_date, end_date))
         entries = cursor.fetchall()
         print(entries)
@@ -37,8 +37,8 @@ def update_entry_list(start_date, end_date):
             tree.delete(item)
 
         for entry in entries:
-            placa, data_entrada, data_saida, tempo_estadia, valor_total = entry
-            tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total))
+            placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento = entry
+            tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento))
 
         conn.close()
 
@@ -57,7 +57,7 @@ def export_pdf():
         doc = SimpleDocTemplate(filename, pagesize=letter)
         data = []
 
-        header = ("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago")
+        header = ("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento")
         data.append(header)
 
         for entry in tree.get_children():
@@ -95,7 +95,7 @@ def export_excel():
         ws = wb.active
         ws.title = "Relatório"
 
-        header = ["Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago"]
+        header = ["Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento"]
         ws.append(header)
 
         for entry in tree.get_children():
@@ -141,17 +141,18 @@ end_date_label.grid(row=2, column=1, padx=0, pady=5, sticky="w")  # Place in row
 end_date_entry = DateEntry(master=fr, width=16, background="magenta3", foreground="white", bd=2, locale="pt_br")
 end_date_entry.grid(row=2, column=1, padx=(80, 0), pady=5, sticky="w")  # Place in row 4, column 3
 
-generate_button = customtkinter.CTkButton(master=fr, width=240, height=40, text="GERAR", command=generate_report)
-generate_button.grid(row=3, column=0, pady=10)  # Place in row 4, starting from column 4
+generate_button = customtkinter.CTkButton(master=fr, width=140, height=40, text="GERAR", command=generate_report)
+generate_button.grid(row=2, column=1, pady=10, sticky="e" )  # Place in row 4, starting from column 4
 
 tree = tk.ttk.Treeview(master=fr,
-                       columns=("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago"))
+                       columns=("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento"))
 tree['show'] = 'headings'
 tree.heading("#1", text="Placa")
 tree.heading("#2", text="Data de Entrada")
 tree.heading("#3", text="Data de Saída")
 tree.heading("#4", text="Tempo de Permanência")
 tree.heading("#5", text="Valor Pago")
+tree.heading("#6", text="Pagamento")
 
 # Set column widths
 tree.column("#1", width=100)
@@ -159,8 +160,13 @@ tree.column("#2", width=150)
 tree.column("#3", width=150)
 tree.column("#4", width=150)
 tree.column("#5", width=150)
+tree.column("#6", width=150)
 
-tree.grid(row=6, column=0, columnspan=2, padx=10, pady=12, sticky="nsew")
+treeScroll = tk.Scrollbar(master=fr)
+treeScroll.configure(command=tree.yview)
+treeScroll.grid(row=4, column=2, sticky='ns', padx=(0, 10), pady=10)  # Place on the right side
+
+tree.grid(row=4, column=0, columnspan=2, sticky='nsew', padx=(10, 0), pady=10)
 
 button = customtkinter.CTkButton(master=fr, width=240, height=40, text="EXPORTAR PDF", command=export_pdf)
 button.grid(row=7, column=0, padx=10, pady=10)

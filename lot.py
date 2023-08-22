@@ -99,12 +99,12 @@ def open_entry_details(event):
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=8,
-            border=4,
+            border=0,
         )
         qr.add_data(selected_entry)
         qr.make(fit=True)
 
-        qr_img = qr.make_image(fill_color="white", back_color="black")
+        qr_img = qr.make_image(fill_color="white", back_color="#212121")
         qr_photo = ImageTk.PhotoImage(qr_img)
 
 
@@ -194,7 +194,12 @@ tree.column("#1", width=100)
 tree.column("#2", width=150)
 
 
-tree.pack(pady=12, padx=10)
+treeScroll = tk.Scrollbar(master=fr)
+treeScroll.configure(command=tree.yview)
+tree.configure(yscrollcommand=treeScroll.set)
+treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
+tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
+treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
 
 
 

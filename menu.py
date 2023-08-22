@@ -10,7 +10,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 rt = customtkinter.CTk()
-rt.geometry("600x520")
+rt.after(0, lambda:rt.state('zoomed'))
 
 # Funções para os botões
 def open_entrada():

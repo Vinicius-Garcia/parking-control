@@ -13,7 +13,7 @@ customtkinter.set_default_color_theme("dark-blue")
 
 # Create the main tkinter window
 rt = customtkinter.CTk()
-rt.geometry("600x600")
+rt.after(0, lambda:rt.state('zoomed'))
 
 
 def open_entry_details(selected_item):
@@ -229,7 +229,7 @@ treeScroll = tk.Scrollbar(master=fr)
 treeScroll.configure(command=tree.yview)
 tree.configure(yscrollcommand=treeScroll.set)
 treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
-tree.pack(side='left', fill='both', expand=True, padx=(0, 10), pady=10)
+tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
 treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
 
 

@@ -7,7 +7,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 rt = customtkinter.CTk()
-rt.geometry("600x300")
+rt.after(0, lambda:rt.state('zoomed'))
 
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
