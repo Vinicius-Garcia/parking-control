@@ -170,7 +170,7 @@ def draw_img(hdc, dib, maxh, maxw):
     h = min(h, maxh)
     w = min(w, maxw)
     l = (maxw - w) // 2
-    t = 200
+    t = 100
     dib.draw(hdc, (l, t, l + w, t + h))
 
 def add_img(hdc, file_name, new_page=False):
@@ -185,8 +185,15 @@ def add_img(hdc, file_name, new_page=False):
         hdc.EndPage()
 
 def print_entry(placa, data):
-    PHYSICALWIDTH = 100
-    PHYSICALHEIGHT = 400
+    conn = sqlite3.connect('user_data.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT text, type FROM texts")
+    texts = cursor.fetchall()
+
+    print(texts)
+#[('teste1', 'TICKET'), ('FRASE PARA TICKET1', 'TICKET'), ('FRASE PARA RECIBO', 'RECIBO')]
+# aqui depois da palavra ticket deve ser colocado todos os  texts que for type ticket
     printer_name = win32print.GetDefaultPrinter()
     print(printer_name)
     hprinter = win32print.OpenPrinter(printer_name)
@@ -202,18 +209,18 @@ def print_entry(placa, data):
     text_x = (page_width - text_width) // 2
 
     ticket_font = win32ui.CreateFont({
-        "name": "Arial",
-        "height": 100
+        "name": "Roboto",
+        "height": 40
     })
     pdc.SelectObject(ticket_font)
     # Draw centered "TICKET" text
-    pdc.TextOut(text_x, 100, "TICKET")
+    pdc.TextOut(0, 0, "TICKET")
 
     # Draw QR code centered
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=20,
+        box_size=10,
         border=4,
     )
     qr.add_data(placa)
@@ -224,10 +231,10 @@ def print_entry(placa, data):
     add_img(pdc, temp_qr_image_path)
 
     # Draw plate and date text
-    pdc.TextOut(text_x - 400 , 800, "PLACA: " )
-    pdc.TextOut(text_x +400, 800,  placa)
-    pdc.TextOut(text_x - 400, 950, "DATA/HORA: " )
-    pdc.TextOut(text_x + 400, 950, data)
+    pdc.TextOut(0 , 400, "PLACA: " )
+    pdc.TextOut(0 , 400,  placa)
+    pdc.TextOut(0 , 500, "DATA/HORA: " )
+    pdc.TextOut(0 , 500, data)
 
     pdc.EndPage()
     pdc.EndDoc()

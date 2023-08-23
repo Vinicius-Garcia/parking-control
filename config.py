@@ -356,7 +356,7 @@ def texts():
         text_entry = customtkinter.CTkEntry(adddetails_window, width=300, height=40, placeholder_text="Texto")
         text_entry.pack(pady=12, padx=10)
 
-        combo = customtkinter.CTkComboBox(adddetails_window, width=300, height=40, values=["TICKET", "RECIBO"])
+        combo = customtkinter.CTkComboBox(adddetails_window, width=300, height=40, values=["PADRÃO SUPERIOR", "TICKET INFERIOR", "RECIBO INFERIOR"])
         combo.pack(pady=12, padx=10)
 
         button = customtkinter.CTkButton(adddetails_window, width=300, height=40, text="CADASTRAR",
