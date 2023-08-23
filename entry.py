@@ -6,14 +6,16 @@ import tkinter as tk
 from tkinter import messagebox
 import locale
 import qrcode
-from PIL import Image, ImageTk, ImageWin
+from PIL import Image as pil_image, ImageWin as pil_image_win, ImageTk
 import win32print
 import win32ui
 from escpos.printer import Serial, Usb
 import configparser
 import sys
 import usb.core
-
+import win32con as wcon
+import win32con
+import win32print as wprn
 
 
 config = configparser.ConfigParser()
@@ -128,44 +130,109 @@ def open_entry_details(event):
         button.pack(pady=12, padx=10)
 
 
-def print_entry_2(placa, data):
+def print_entry_teste(placa, data):
+    getAllPrinters()
     try:
-        porta = config.get("config", "porta")
-        print(porta)
-        p = Serial(devfile=porta,
-                   baudrate=9600,
-                   bytesize=8,
-                   parity='N',
-                   stopbits=1,
-                   timeout=1.00,
-                   dsrdtr=True)
+        # Encontre o dispositivo USB com os IDs de fornecedor e produto
+        device = usb.core.find(idVendor=0xFFF0, idProduct=0x0062)
 
-        p.text("TICKET\n")
-        p.qr(placa, size=4)
-        p.text(f"Placa: {placa}\n")
-        p.text(f"Data: {data}\n")
+        if device is None:
+            raise Exception("Dispositivo USB não encontrado.")
 
-        p.cut()
+        # Detach do driver do kernel (se necessário)
+        if device.is_kernel_driver_active(0):
+            device.detach_kernel_driver(0)
 
-        # Close the details_window after printing
-        details_window.destroy()
+        # Configuração do dispositivo
+        device.set_configuration()
 
+        # Crie uma instância da impressora USB
+        printer = Usb(0x1ABD, 0x0010)
+
+        # Imprima o ticket
+        printer.text("TICKET\n")
+        printer.qr(placa, size=4)
+        printer.text(f"Placa: {placa}\n")
+        printer.text(f"Data: {data}\n")
+        printer.cut()
+
+        # Feche a instância da impressora
+        printer.close()
+
+        print("Ticket impresso com sucesso!")
     except Exception as e:
         print(e)
-        messagebox.showerror("Erro", "Erro ao imprimir ticket")
-        return
+        print("Erro ao imprimir o ticket.")
 
+def draw_img(hdc, dib, maxh, maxw):
+    w, h = dib.size
+    print("Image HW: ({:d}, {:d}), Max HW: ({:d}, {:d})".format(h, w, maxh, maxw))
+    h = min(h, maxh)
+    w = min(w, maxw)
+    l = (maxw - w) // 2
+    t = 200
+    dib.draw(hdc, (l, t, l + w, t + h))
+
+def add_img(hdc, file_name, new_page=False):
+    if new_page:
+        hdc.StartPage()
+    maxw = hdc.GetDeviceCaps(wcon.HORZRES)
+    maxh = hdc.GetDeviceCaps(wcon.VERTRES)
+    img = pil_image.open(file_name)
+    dib = pil_image_win.Dib(img)
+    draw_img(hdc.GetHandleOutput(), dib, maxh, maxw)
+    if new_page:
+        hdc.EndPage()
 
 def print_entry(placa, data):
-    try:
-        p = Usb(0x1ABD, 0x0010)
-        p.text("Hello, world!\n")
-        p.cut()
+    PHYSICALWIDTH = 100
+    PHYSICALHEIGHT = 400
+    printer_name = win32print.GetDefaultPrinter()
+    print(printer_name)
+    hprinter = win32print.OpenPrinter(printer_name)
+    printer_info = win32print.GetPrinter(hprinter, 2)
+    pdc = win32ui.CreateDC()
+    pdc.CreatePrinterDC(printer_name)
+    pdc.StartDoc('Ticket')
+    pdc.StartPage()
 
-    except Exception as e:
-        print(e)
-        messagebox.showerror("Erro", "Erro ao imprimir ticket")
-        return
+    # Calculate center position for the text
+    page_width = pdc.GetDeviceCaps(win32con.PHYSICALWIDTH)
+    text_width = pdc.GetTextExtent("TICKET")[0]
+    text_x = (page_width - text_width) // 2
+
+    ticket_font = win32ui.CreateFont({
+        "name": "Arial",
+        "height": 100
+    })
+    pdc.SelectObject(ticket_font)
+    # Draw centered "TICKET" text
+    pdc.TextOut(text_x, 100, "TICKET")
+
+    # Draw QR code centered
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=20,
+        border=4,
+    )
+    qr.add_data(placa)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    temp_qr_image_path = "temp_qr_image.png"
+    img.save(temp_qr_image_path)
+    add_img(pdc, temp_qr_image_path)
+
+    # Draw plate and date text
+    pdc.TextOut(text_x - 400 , 800, "PLACA: " )
+    pdc.TextOut(text_x +400, 800,  placa)
+    pdc.TextOut(text_x - 400, 950, "DATA/HORA: " )
+    pdc.TextOut(text_x + 400, 950, data)
+
+    pdc.EndPage()
+    pdc.EndDoc()
+    pdc.DeleteDC()
+    win32print.ClosePrinter(hprinter)
 
 
 def update_entry_list():
