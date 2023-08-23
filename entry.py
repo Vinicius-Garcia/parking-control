@@ -198,14 +198,19 @@ def handle_listbox_click():
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
 
+
+
 label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="DAR ENTRADA", font=("Roboto", 24))
 label.pack(pady=12, padx=10)
 
-entry1 = customtkinter.CTkEntry(master=fr, width=240, height=32, placeholder_text="PLACA", validate="key", validatecommand=(rt.register(validate_length), '%P'))
-entry1.pack(pady=12, padx=10)
+search = customtkinter.CTkFrame(master=fr)
+search.pack(pady=40, padx=120)
 
-button = customtkinter.CTkButton(master=fr, width=240, height=32, text="DAR ENTRADA", command=send_entry)
-button.pack(pady=12, padx=10)
+entry1 = customtkinter.CTkEntry(search, width=240, height=32, placeholder_text="PLACA", validate="key", validatecommand=(rt.register(validate_length), '%P'))
+entry1.pack(pady=12, padx=10, side="left")
+
+button = customtkinter.CTkButton(search, width=240, height=32, text="DAR ENTRADA", command=send_entry)
+button.pack(pady=12, padx=10, side="left")
 
 
 tree = tk.ttk.Treeview(master=fr,

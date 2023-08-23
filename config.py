@@ -474,17 +474,19 @@ def texts():
     tree.bind("<Double-1>", open_texts_details)
 
 
+label = customtkinter.CTkLabel(master=fr, text="CONFIGURAÇÕES", font=("Roboto", 32))
+label.pack(padx=(10,10), pady=(150,20), )
 
 button_users = customtkinter.CTkButton(
-    master=fr, width=240, height=32, text="USUÁRIOS", command=users)
+    master=fr, width=480, height=48, text="USUÁRIOS", command=users)
 button_users.pack(pady=12, padx=10)
 
 button_price = customtkinter.CTkButton(
-    master=fr, width=240, height=32, text="TABELA DE PREÇO", command=price)
+    master=fr, width=480, height=48, text="TABELA DE PREÇO", command=price)
 button_price.pack(pady=12, padx=10)
 
 button_price = customtkinter.CTkButton(
-    master=fr, width=240, height=32, text="FRASES TICKET", command=texts)
+    master=fr, width=480, height=48, text="FRASES TICKET", command=texts)
 button_price.pack(pady=12, padx=10)
 
 rt.mainloop()

@@ -22,7 +22,8 @@ customtkinter.set_default_color_theme("dark-blue")
 
 # Create the main tkinter window
 rt = customtkinter.CTk()
-rt.geometry("600x600")
+rt.after(0, lambda:rt.state('zoomed'))
+
 
 # Validation function for entry length
 def validate_length(P):

@@ -124,25 +124,42 @@ def generate_report():
 
 
 fr = customtkinter.CTkFrame(master=rt)
-fr.grid(row=0, column=0, padx=120, pady=40, sticky="nsew")
+fr.pack(pady=40, padx=120, fill="both", expand=True)
+
+
+
 
 label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="RELATÓRIO", font=("Roboto", 24))
-label.grid(row=0, column=0, pady=12, padx=10, columnspan=2)
+label.pack(pady=12, padx=10)
 
-start_date_label = customtkinter.CTkLabel(master=fr, text="Data Inicial:")
-start_date_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")  # Place in row 4, column 0
+datesFrame = customtkinter.CTkFrame(master=fr)
+datesFrame.pack(pady=10, padx=10, anchor="center")
 
-start_date_entry = DateEntry(master=fr, width=16, background="magenta3", foreground="white", bd=2, locale="pt_br")
-start_date_entry.grid(row=2, column=0, padx=(80, 0), pady=5, sticky="w")  # Place in row 4, column 1
 
-end_date_label = customtkinter.CTkLabel(master=fr, text="Data Final:")
-end_date_label.grid(row=2, column=1, padx=0, pady=5, sticky="w")  # Place in row 4, column 2
 
-end_date_entry = DateEntry(master=fr, width=16, background="magenta3", foreground="white", bd=2, locale="pt_br")
-end_date_entry.grid(row=2, column=1, padx=(80, 0), pady=5, sticky="w")  # Place in row 4, column 3
+start_date_label = customtkinter.CTkLabel(datesFrame, text="Data Inicial:")
+start_date_label.pack(padx=(10,10), pady=5, side="left")
 
-generate_button = customtkinter.CTkButton(master=fr, width=140, height=40, text="GERAR", command=generate_report)
-generate_button.grid(row=2, column=1, pady=10, sticky="e" )  # Place in row 4, starting from column 4
+start_date_entry = DateEntry(datesFrame, width=16, background="magenta3", foreground="white", bd=2, locale="pt_br")
+start_date_entry.pack(padx=(0,40), pady=5, anchor="w", side="left" )
+
+end_date_label = customtkinter.CTkLabel(datesFrame, text="Data Final:")
+end_date_label.pack(padx=(10,10), pady=5, anchor="w", side="left")
+
+end_date_entry = DateEntry(datesFrame, width=16, background="magenta3", foreground="white", bd=2, locale="pt_br")
+end_date_entry.pack(padx=(0, 40), pady=5, anchor="w", side="left")
+
+generate_button = customtkinter.CTkButton(datesFrame, width=140, height=40, text="GERAR", command=generate_report)
+generate_button.pack(pady=10, padx=10, anchor="e", side="left")
+
+generate = customtkinter.CTkFrame(master=fr)
+generate.pack(pady=10, padx=10, anchor="e")
+
+button = customtkinter.CTkButton(generate, width=120, height=24, text="EXPORTAR PDF", command=export_pdf)
+button.pack(padx=10, pady=10, side="left")
+
+button1 = customtkinter.CTkButton(generate, width=120, height=24, text="EXPORTAR EXCEL", command=export_excel)
+button1.pack(padx=10, pady=10, side="left")
 
 tree = tk.ttk.Treeview(master=fr,
                        columns=("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento"))
@@ -164,14 +181,10 @@ tree.column("#6", width=150)
 
 treeScroll = tk.Scrollbar(master=fr)
 treeScroll.configure(command=tree.yview)
-treeScroll.grid(row=4, column=2, sticky='ns', padx=(0, 10), pady=10)  # Place on the right side
+treeScroll.pack(side="right", fill="y", padx=(0, 10), pady=10)
 
-tree.grid(row=4, column=0, columnspan=2, sticky='nsew', padx=(10, 0), pady=10)
+tree.pack(fill="both", expand=True, padx=(10, 0), pady=10)
 
-button = customtkinter.CTkButton(master=fr, width=240, height=40, text="EXPORTAR PDF", command=export_pdf)
-button.grid(row=7, column=0, padx=10, pady=10)
 
-button1 = customtkinter.CTkButton(master=fr, width=240, height=40, text="EXPORTAR EXCEL", command=export_excel)
-button1.grid(row=7, column=1, padx=10, pady=10)
 
 rt.mainloop()

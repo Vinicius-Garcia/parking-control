@@ -34,19 +34,19 @@ def switch_to_register_screen():
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="Login", font=("Roboto", 24))
-label.pack(pady=12, padx=10)
+label = customtkinter.CTkLabel(master=fr, width=480, height=32, text="Login", font=("Roboto", 48))
+label.pack(pady=(250,20), padx=10)
 
-entry1 = customtkinter.CTkEntry(master=fr, width=240, height=32, placeholder_text="Usuário")
+entry1 = customtkinter.CTkEntry(master=fr, width=480, height=48, placeholder_text="Usuário")
 entry1.pack(pady=12, padx=10)
 
-entry2 = customtkinter.CTkEntry(master=fr, width=240, height=32, placeholder_text="Senha", show="*")
+entry2 = customtkinter.CTkEntry(master=fr, width=480, height=48, placeholder_text="Senha", show="*")
 entry2.pack(pady=12, padx=10)
 
-button = customtkinter.CTkButton(master=fr, width=240, height=32, text="Login", command=login)
+button = customtkinter.CTkButton(master=fr, width=480, height=48, text="Login", command=login)
 button.pack(pady=12, padx=10)
 
-register_button = customtkinter.CTkButton(master=fr, width=240, height=32, text="Registre-se", command=switch_to_register_screen)
+register_button = customtkinter.CTkButton(master=fr, width=480, height=48, text="Registre-se", command=switch_to_register_screen)
 register_button.pack(pady=12, padx=10)
 
 

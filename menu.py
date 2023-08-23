@@ -44,22 +44,22 @@ def logout():
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="Main Menu", font=("Roboto", 24))
-label.pack(pady=12, padx=10)
+label = customtkinter.CTkLabel(master=fr, width=120, height=48, text="Main Menu", font=("Roboto", 48))
+label.pack(pady=(150,10), padx=10)
 
-button1 = customtkinter.CTkButton(master=fr, width=240, height=32, text="DAR ENTRADA", command=open_entrada)
+button1 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR ENTRADA", command=open_entrada)
 button1.pack(pady=12, padx=10)
 
-button2 = customtkinter.CTkButton(master=fr, width=240, height=32, text="DAR SAÍDA", command=open_saida)
+button2 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR SAÍDA", command=open_saida)
 button2.pack(pady=12, padx=10)
 
-button3 = customtkinter.CTkButton(master=fr, width=240, height=32, text="PÁTIO", command=open_patio)
+button3 = customtkinter.CTkButton(master=fr, width=480, height=48, text="PÁTIO", command=open_patio)
 button3.pack(pady=12, padx=10)
 
-button4 = customtkinter.CTkButton(master=fr, width=240, height=32, text="RELATÓRIO", command=open_relatorio)
+button4 = customtkinter.CTkButton(master=fr, width=480, height=48, text="RELATÓRIO", command=open_relatorio)
 button4.pack(pady=12, padx=10)
 
-button5 = customtkinter.CTkButton(master=fr, width=240, height=32, text="CONFIGURAÇÃO", command=open_config)
+button5 = customtkinter.CTkButton(master=fr, width=480, height=48, text="CONFIGURAÇÃO", command=open_config)
 button5.pack(pady=12, padx=10)
 
 if user_type != "GERENTE":
@@ -67,7 +67,7 @@ if user_type != "GERENTE":
     button4.configure(state="disabled")
     button5.configure(state="disabled")
 
-button6 = customtkinter.CTkButton(master=fr, width=240, height=32, text="LOGOUT",fg_color='#91403d', command=logout)
+button6 = customtkinter.CTkButton(master=fr, width=480, height=48, text="LOGOUT",fg_color='#91403d', command=logout)
 button6.pack(pady=12, padx=10)
 
 
