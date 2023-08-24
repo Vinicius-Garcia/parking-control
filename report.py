@@ -30,7 +30,6 @@ def update_entry_list(start_date, end_date):
             "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento  FROM history WHERE data_saida BETWEEN ? AND ?",
             (start_date, end_date))
         entries = cursor.fetchall()
-        print(entries)
         tree.delete(*tree.get_children())
         for item in tree.get_children():
             tree.delete(item)
@@ -114,9 +113,6 @@ def generate_report():
 
     start_datetime = f"{start_date} 00:00:00"
     end_datetime = f"{end_date} 23:59:59"
-
-    print(start_datetime)
-    print(end_datetime)
 
     update_entry_list(start_datetime, end_datetime)
 
