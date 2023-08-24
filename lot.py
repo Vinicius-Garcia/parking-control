@@ -112,31 +112,108 @@ def open_entry_details(event):
         button.pack(pady=12, padx=10)
 
 
+def draw_img(hdc, dib, maxh, maxw, y_position):
+    w, h = dib.size
+    print("Image HW: ({:d}, {:d}), Max HW: ({:d}, {:d})".format(h, w, maxh, maxw))
+    h = min(h, maxh)
+    w = min(w, maxw)
+    l = (maxw - w) // 2
+    t = y_position
+    dib.draw(hdc, (l, t, l + w, t + h))
+
+def add_img(hdc, file_name,y_position ,new_page=False):
+    if new_page:
+        hdc.StartPage()
+    maxw = hdc.GetDeviceCaps(wcon.HORZRES)
+    maxh = hdc.GetDeviceCaps(wcon.VERTRES)
+    img = pil_image.open(file_name)
+    dib = pil_image_win.Dib(img)
+    draw_img(hdc.GetHandleOutput(), dib, maxh, maxw, y_position)
+    if new_page:
+        hdc.EndPage()
+
 def print_entry(placa, data):
-    try:
-        porta = config.get("config", "porta")
-        print(porta)
-        p = Serial(devfile=porta,
-                   baudrate=9600,
-                   bytesize=8,
-                   parity='N',
-                   stopbits=1,
-                   timeout=1.00,
-                   dsrdtr=True)
+    conn = sqlite3.connect('user_data.db')
+    cursor = conn.cursor()
 
-        p.text("TICKET\n")
-        p.qr(placa, size=4)
-        p.text(f"Placa: {placa}\n")
-        p.text(f"Data: {data}\n")
+    cursor.execute("SELECT text, type, ordem FROM texts")
+    texts = cursor.fetchall()
 
-        p.cut()
+    padrão_superior_texts = [text for text in texts if text[1] == 'PADRÃO SUPERIOR']
+    qr_code_texts = [text for text in texts if text[1] == 'QR CODE']
+    padrão_inferior_texts = [text for text in texts if text[1] == 'TICKET INFERIOR']
 
-        details_window.destroy()
+    printer_name = win32print.GetDefaultPrinter()
+    hprinter = win32print.OpenPrinter(printer_name)
+    printer_info = win32print.GetPrinter(hprinter, 2)
+    pdc = win32ui.CreateDC()
+    pdc.CreatePrinterDC(printer_name)
+    pdc.StartDoc('Ticket')
+    pdc.StartPage()
 
-    except Exception as e:
-        print(e)
-        messagebox.showerror("Erro", "Erro ao imprimir ticket")
-        return
+    y_position = 0  # Starting y-position for the text
+
+    font = win32ui.CreateFont({
+        "name": "Arial",  # Change to the desired font name
+        "height": 30,  # Change to the desired font size
+    })
+
+    pdc.SelectObject(font)
+
+    for text in padrão_superior_texts:
+        text_content, _, ordem = text
+        x_position = 0  # Starting x-position for the text
+        y_position += 40  # Calculate y-position based on ordem value
+
+        print(y_position)
+        print(text_content)
+
+        # Draw the text
+        pdc.TextOut(x_position, y_position, text_content)
+
+    y_position += 50  # Adjust y-position after PADRÃO SUPERIOR text
+
+    # Draw QR code centered
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=8,
+        border=4,
+    )
+    qr.add_data(placa)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    temp_qr_image_path = "temp_qr_image.png"
+    img.save(temp_qr_image_path)
+    add_img(pdc, temp_qr_image_path, y_position)
+
+    width = pdc.GetDeviceCaps(wcon.HORZRES)
+
+    print(width)
+
+    y_position += 250  # Adjust y-position after QR code
+
+    print()
+    pdc.TextOut(0, y_position, "PLACA: " )
+    pdc.TextOut((width - pdc.GetTextExtent(placa)[0]) , y_position,  placa)
+    y_position += 50  # Adjust y-position after PLACA text
+    pdc.TextOut(0, y_position, "DATA/HORA: " )
+    pdc.TextOut((width - pdc.GetTextExtent(data)[0]), y_position,  data)
+    y_position += 20
+    for text in padrão_inferior_texts:
+        text_content, _, ordem = text
+        l = width // 2
+        x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
+
+        y_position +=  40  # Calculate y-position based on ordem value
+
+        # Draw the text
+        pdc.TextOut(x_position, y_position, text_content)
+
+    pdc.EndPage()
+    pdc.EndDoc()
+    pdc.DeleteDC()
+    win32print.ClosePrinter(hprinter)
 
 
 def update_entry_list():

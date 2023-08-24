@@ -5,6 +5,10 @@ import tkinter as tk
 from tkinter import messagebox
 import locale
 import math
+import win32print
+import win32ui
+import win32con as wcon
+import win32con
 
 
 customtkinter.set_appearance_mode("dark")
@@ -15,6 +19,8 @@ rt.after(0, lambda:rt.state('zoomed'))
 
 
 def open_entry_details(selected_item):
+
+
     selected_item = tree.selection()[0]
     selected_entry = tree.item(selected_item, "values")
     details_window = tk.Toplevel(rt)
@@ -45,7 +51,7 @@ def open_entry_details(selected_item):
     details_frame.pack(pady=20, padx=10, fill="both", expand=True)
 
     details_label = customtkinter.CTkLabel(
-        details_frame, width=120, height=1, text="TICKET", font=("Roboto", 24))
+        details_frame, width=120, height=1, text="RECIBO", font=("Roboto", 24))
     details_label.pack(pady=6, padx=10)
 
     details_label = customtkinter.CTkLabel(
@@ -110,6 +116,142 @@ def open_entry_details(selected_item):
 
     pagamento = combo.get()
     formatted_saida = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+
+    def move_to_history(placa, entrada, saida, tempo, pagamento):
+        def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento):
+            conn = sqlite3.connect('user_data.db')
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT text, type, ordem FROM texts")
+            texts = cursor.fetchall()
+
+            padrão_superior_texts = [text for text in texts if text[1] == 'PADRÃO SUPERIOR']
+            recibo_inferior = [text for text in texts if text[1] == 'RECIBO INFERIOR']
+            padrão_inferior_texts = [text for text in texts if text[1] == 'TICKET INFERIOR']
+
+            printer_name = win32print.GetDefaultPrinter()
+            hprinter = win32print.OpenPrinter(printer_name)
+            printer_info = win32print.GetPrinter(hprinter, 2)
+            pdc = win32ui.CreateDC()
+            pdc.CreatePrinterDC(printer_name)
+            pdc.StartDoc('Ticket')
+            pdc.StartPage()
+
+            y_position = 0  # Starting y-position for the text
+
+            font = win32ui.CreateFont({
+                "name": "Arial",  # Change to the desired font name
+                "height": 30,  # Change to the desired font size
+            })
+
+            pdc.SelectObject(font)
+            width = pdc.GetDeviceCaps(wcon.HORZRES)
+
+            pdc.TextOut(((width - pdc.GetTextExtent("RECIBO")[0]) // 2), y_position, "RECIBO")
+
+            for text in padrão_superior_texts:
+                text_content, _, ordem = text
+                x_position = 0  # Starting x-position for the text
+                y_position += 40  # Calculate y-position based on ordem value
+
+                print(y_position)
+                print(text_content)
+
+                # Draw the text
+                pdc.TextOut(x_position, y_position, text_content)
+
+            y_position += 100  # Adjust y-position after PADRÃO SUPERIOR text
+
+
+            pdc.TextOut(0, y_position, "PLACA: ")
+            pdc.TextOut((width - pdc.GetTextExtent(placa)[0]), y_position, placa)
+            y_position += 50  # Adjust y-position after PLACA text
+            pdc.TextOut(0, y_position, "DATA DE ENTRADA: ")
+            pdc.TextOut((width - pdc.GetTextExtent(entrada)[0]), y_position, entrada)
+            y_position += 50  # Adjust y-position after PLACA text
+            pdc.TextOut(0, y_position, "SAIDA: ")
+            pdc.TextOut((width - pdc.GetTextExtent(saida)[0]), y_position, saida)
+            y_position += 50  # Adjust y-position after PLACA text
+            pdc.TextOut(0, y_position, "VALOR TOTAL: ")
+            pdc.TextOut((width - pdc.GetTextExtent(str(valor_total))[0]), y_position, str(valor_total))
+            y_position += 50  # Adjust y-position after PLACA text
+            pdc.TextOut(0, y_position, "PAGAMENTO: ")
+            pdc.TextOut((width - pdc.GetTextExtent(pagamento)[0]), y_position, pagamento)
+            y_position += 20
+            for text in recibo_inferior:
+                text_content, _, ordem = text
+                l = width // 2
+                x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
+
+                y_position += 40  # Calculate y-position based on ordem value
+
+                # Draw the text
+                pdc.TextOut(x_position, y_position, text_content)
+
+            pdc.EndPage()
+            pdc.EndDoc()
+            pdc.DeleteDC()
+            win32print.ClosePrinter(hprinter)
+            details_window.destroy()
+
+        try:
+            conn = sqlite3.connect('user_data.db')
+            cursor = conn.cursor()
+
+            cursor.execute('''CREATE TABLE IF NOT EXISTS history (
+                                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                  placa TEXT,
+                                  data_entrada TEXT,
+                                  data_saida TEXT,
+                                  tempo_estadia TEXT,
+                                  valor_total REAL,
+                                  pagamento TEXT
+                                )''')
+
+            tempo_str = str(tempo)
+
+            cursor.execute(
+                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
+            price_row = cursor.fetchone()
+
+            carencia = int(price_row[0]) if price_row else 0
+            primeira_faixa = float(price_row[1]) if price_row else 0.0  # Use float instead of int
+            demais_faixas = int(price_row[2]) if price_row else 0
+            tempo_primeira_faixa = int(price_row[3]) if price_row else 0
+            tempo_demais_faixas = int(price_row[4]) if price_row else 0
+
+            valor_total = 0.0
+            total_minutos = tempo.total_seconds() / 60
+            if total_minutos <= carencia:
+                valor_total = 0.0
+            else:
+                print(total_minutos)
+                if total_minutos <= tempo_primeira_faixa:
+                    valor_total = primeira_faixa
+                else:
+                    valor_total += primeira_faixa
+
+                    total_minutos = total_minutos - tempo_primeira_faixa
+                    if total_minutos > 0:
+                        total_minutos = total_minutos / tempo_demais_faixas
+                        total_minutos_ceiled = math.ceil(total_minutos)
+                        valor_total += total_minutos_ceiled * demais_faixas
+
+            cursor.execute(
+                "INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento) VALUES (?, ?, ?, ?, ?, ?)",
+                (placa, entrada, saida, tempo_str, valor_total, pagamento))
+
+            cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
+
+            conn.commit()
+            conn.close()
+            print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento)
+            update_entry_list()
+
+        except sqlite3.Error as e:
+            print("SQLite error:", e)
+
     button = customtkinter.CTkButton(details_frame, width=240, height=32, text="DAR SAIDA", command=lambda: move_to_history(selected_entry, formatted_time, formatted_saida, time_difference, pagamento))
     button.pack(pady=12, padx=10)
 
@@ -137,62 +279,9 @@ def handle_listbox_click():
         selected_item = listbox.get(selected_index)
         open_entry_details(selected_item)
 
-def move_to_history(placa, entrada, saida, tempo, pagamento):
-    try:
-        conn = sqlite3.connect('user_data.db')
-        cursor = conn.cursor()
-
-        cursor.execute('''CREATE TABLE IF NOT EXISTS history (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            placa TEXT,
-                            data_entrada TEXT,
-                            data_saida TEXT,
-                            tempo_estadia TEXT,
-                            valor_total REAL,
-                            pagamento TEXT
-                          )''')
-
-        tempo_str = str(tempo)
-
-        cursor.execute("SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
-        price_row = cursor.fetchone()
-
-        carencia = int(price_row[0]) if price_row else 0
-        primeira_faixa = float(price_row[1]) if price_row else 0.0  # Use float instead of int
-        demais_faixas = int(price_row[2]) if price_row else 0
-        tempo_primeira_faixa = int(price_row[3]) if price_row else 0
-        tempo_demais_faixas = int(price_row[4]) if price_row else 0
-
-        valor_total = 0.0
-        total_minutos = tempo.total_seconds() / 60
-        if total_minutos <= carencia:
-            valor_total = 0.0
-        else:
-            print(total_minutos)
-            if total_minutos <= tempo_primeira_faixa:
-                valor_total = primeira_faixa
-            else:
-                valor_total += primeira_faixa
-
-                total_minutos = total_minutos - tempo_primeira_faixa
-                if total_minutos > 0:
-                    total_minutos = total_minutos / tempo_demais_faixas
-                    total_minutos_ceiled = math.ceil(total_minutos)
-                    valor_total += total_minutos_ceiled * demais_faixas
 
 
-        cursor.execute("INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento) VALUES (?, ?, ?, ?, ?, ?)",
-                       (placa, entrada, saida, tempo_str, valor_total, pagamento))
 
-        cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
-        
-        conn.commit()
-        conn.close()
-        messagebox.showinfo("Sucesso", "Veículo retirado com sucesso!")
-        update_entry_list()
-
-    except sqlite3.Error as e:
-        print("SQLite error:", e)
 
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
