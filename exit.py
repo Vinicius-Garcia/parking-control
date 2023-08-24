@@ -119,6 +119,7 @@ def open_entry_details(selected_item):
 
 
     def move_to_history(placa, entrada, saida, tempo, pagamento):
+        pagamento = combo.get()
         def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento):
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()

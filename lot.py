@@ -11,6 +11,9 @@ import win32print
 import win32ui
 from escpos.printer import Serial
 import configparser
+import win32con as wcon
+from PIL import Image as pil_image, ImageWin as pil_image_win, ImageTk
+
 
 
 config = configparser.ConfigParser()
