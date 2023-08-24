@@ -130,57 +130,23 @@ def open_entry_details(event):
         button.pack(pady=12, padx=10)
 
 
-def print_entry_teste(placa, data):
-    getAllPrinters()
-    try:
-        # Encontre o dispositivo USB com os IDs de fornecedor e produto
-        device = usb.core.find(idVendor=0xFFF0, idProduct=0x0062)
-
-        if device is None:
-            raise Exception("Dispositivo USB não encontrado.")
-
-        # Detach do driver do kernel (se necessário)
-        if device.is_kernel_driver_active(0):
-            device.detach_kernel_driver(0)
-
-        # Configuração do dispositivo
-        device.set_configuration()
-
-        # Crie uma instância da impressora USB
-        printer = Usb(0x1ABD, 0x0010)
-
-        # Imprima o ticket
-        printer.text("TICKET\n")
-        printer.qr(placa, size=4)
-        printer.text(f"Placa: {placa}\n")
-        printer.text(f"Data: {data}\n")
-        printer.cut()
-
-        # Feche a instância da impressora
-        printer.close()
-
-        print("Ticket impresso com sucesso!")
-    except Exception as e:
-        print(e)
-        print("Erro ao imprimir o ticket.")
-
-def draw_img(hdc, dib, maxh, maxw):
+def draw_img(hdc, dib, maxh, maxw, y_position):
     w, h = dib.size
     print("Image HW: ({:d}, {:d}), Max HW: ({:d}, {:d})".format(h, w, maxh, maxw))
     h = min(h, maxh)
     w = min(w, maxw)
     l = (maxw - w) // 2
-    t = 100
+    t = y_position
     dib.draw(hdc, (l, t, l + w, t + h))
 
-def add_img(hdc, file_name, new_page=False):
+def add_img(hdc, file_name,y_position ,new_page=False):
     if new_page:
         hdc.StartPage()
     maxw = hdc.GetDeviceCaps(wcon.HORZRES)
     maxh = hdc.GetDeviceCaps(wcon.VERTRES)
     img = pil_image.open(file_name)
     dib = pil_image_win.Dib(img)
-    draw_img(hdc.GetHandleOutput(), dib, maxh, maxw)
+    draw_img(hdc.GetHandleOutput(), dib, maxh, maxw, y_position)
     if new_page:
         hdc.EndPage()
 
@@ -188,14 +154,14 @@ def print_entry(placa, data):
     conn = sqlite3.connect('user_data.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT text, type FROM texts")
+    cursor.execute("SELECT text, type, ordem FROM texts")
     texts = cursor.fetchall()
 
-    print(texts)
-#[('teste1', 'TICKET'), ('FRASE PARA TICKET1', 'TICKET'), ('FRASE PARA RECIBO', 'RECIBO')]
-# aqui depois da palavra ticket deve ser colocado todos os  texts que for type ticket
+    padrão_superior_texts = [text for text in texts if text[1] == 'PADRÃO SUPERIOR']
+    qr_code_texts = [text for text in texts if text[1] == 'QR CODE']
+    padrão_inferior_texts = [text for text in texts if text[1] == 'TICKET INFERIOR']
+
     printer_name = win32print.GetDefaultPrinter()
-    print(printer_name)
     hprinter = win32print.OpenPrinter(printer_name)
     printer_info = win32print.GetPrinter(hprinter, 2)
     pdc = win32ui.CreateDC()
@@ -203,24 +169,33 @@ def print_entry(placa, data):
     pdc.StartDoc('Ticket')
     pdc.StartPage()
 
-    # Calculate center position for the text
-    page_width = pdc.GetDeviceCaps(win32con.PHYSICALWIDTH)
-    text_width = pdc.GetTextExtent("TICKET")[0]
-    text_x = (page_width - text_width) // 2
+    y_position = 0  # Starting y-position for the text
 
-    ticket_font = win32ui.CreateFont({
-        "name": "Roboto",
-        "height": 40
+    font = win32ui.CreateFont({
+        "name": "Arial",  # Change to the desired font name
+        "height": 30,  # Change to the desired font size
     })
-    pdc.SelectObject(ticket_font)
-    # Draw centered "TICKET" text
-    pdc.TextOut(0, 0, "TICKET")
+
+    pdc.SelectObject(font)
+
+    for text in padrão_superior_texts:
+        text_content, _, ordem = text
+        x_position = 0  # Starting x-position for the text
+        y_position += 40  # Calculate y-position based on ordem value
+
+        print(y_position)
+        print(text_content)
+
+        # Draw the text
+        pdc.TextOut(x_position, y_position, text_content)
+
+    y_position += 50  # Adjust y-position after PADRÃO SUPERIOR text
 
     # Draw QR code centered
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
+        box_size=8,
         border=4,
     )
     qr.add_data(placa)
@@ -228,13 +203,30 @@ def print_entry(placa, data):
     img = qr.make_image(fill_color="black", back_color="white")
     temp_qr_image_path = "temp_qr_image.png"
     img.save(temp_qr_image_path)
-    add_img(pdc, temp_qr_image_path)
+    add_img(pdc, temp_qr_image_path, y_position)
 
-    # Draw plate and date text
-    pdc.TextOut(0 , 400, "PLACA: " )
-    pdc.TextOut(0 , 400,  placa)
-    pdc.TextOut(0 , 500, "DATA/HORA: " )
-    pdc.TextOut(0 , 500, data)
+    width = pdc.GetDeviceCaps(wcon.HORZRES)
+
+    print(width)
+
+    y_position += 250  # Adjust y-position after QR code
+
+    print()
+    pdc.TextOut(0, y_position, "PLACA: " )
+    pdc.TextOut((width - pdc.GetTextExtent(placa)[0]) , y_position,  placa)
+    y_position += 50  # Adjust y-position after PLACA text
+    pdc.TextOut(0, y_position, "DATA/HORA: " )
+    pdc.TextOut((width - pdc.GetTextExtent(data)[0]), y_position,  data)
+    y_position += 20
+    for text in padrão_inferior_texts:
+        text_content, _, ordem = text
+        l = width // 2
+        x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
+
+        y_position +=  40  # Calculate y-position based on ordem value
+
+        # Draw the text
+        pdc.TextOut(x_position, y_position, text_content)
 
     pdc.EndPage()
     pdc.EndDoc()

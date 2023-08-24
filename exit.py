@@ -7,26 +7,23 @@ import locale
 import math
 
 
-## pegar pela data de saida
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
-# Create the main tkinter window
 rt = customtkinter.CTk()
 rt.after(0, lambda:rt.state('zoomed'))
 
 
 def open_entry_details(selected_item):
-    selected_item = tree.selection()[0]  # Get the selected item's ID
+    selected_item = tree.selection()[0]
     selected_entry = tree.item(selected_item, "values")
     details_window = tk.Toplevel(rt)
     details_window.title("Entry Details")
     details_window.geometry("400x450")
     details_window.configure(bg="#212121")
 
-    placa = selected_entry[0]  # Assuming the first value is the "Placa"
+    placa = selected_entry[0]
     data = selected_entry[1]
-    # Get the selected entry details
     selected_entry = placa
     selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
@@ -63,7 +60,6 @@ def open_entry_details(selected_item):
         details_frame, width=120, height=1, text=f"Tempo desde a entrada: {hours:02d}:{minutes:02d}:{seconds:02d}", font=("Roboto", 16), anchor='w')
     details_label.pack(pady=6, padx=10, anchor="w")
 
-    # Get values from the "price" table
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
@@ -84,7 +80,6 @@ def open_entry_details(selected_item):
     tempo_demais_faixas = int(price_row[4]) if price_row else 0
 
 
-    # Calculate the total value based on time bands and grace period
     valor_total = 0.0
     total_minutos = time_difference.total_seconds() / 60
     print(total_minutos)
@@ -104,11 +99,9 @@ def open_entry_details(selected_item):
                 valor_total += total_minutos_ceiled * demais_faixas
 
 
-    # Set the locale to Brazilian Portuguese for currency formatting
     locale.setlocale(locale.LC_MONETARY, 'pt_BR.utf8')
     valor_total_brl = locale.currency(valor_total, grouping=True)
 
-    # Add a Label to display the calculated value in BRL
     valor_total_brl_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Valor Total: {valor_total_brl}", font=("Roboto", 16), anchor='w')
     valor_total_brl_label.pack(pady=6, padx=10, anchor="w")
 
@@ -140,7 +133,7 @@ def update_entry_list():
 def handle_listbox_click():
     selected_indices = listbox.curselection()
     if selected_indices:
-        selected_index = selected_indices[0]  # Get the first selected index
+        selected_index = selected_indices[0]
         selected_item = listbox.get(selected_index)
         open_entry_details(selected_item)
 
@@ -149,7 +142,6 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
 
-        # Create the "history" table if it doesn't exist
         cursor.execute('''CREATE TABLE IF NOT EXISTS history (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             placa TEXT,
@@ -160,10 +152,8 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
                             pagamento TEXT
                           )''')
 
-        # Convert the timedelta to a formatted string for storage
         tempo_str = str(tempo)
 
-        # Get values from the "price" table
         cursor.execute("SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
         price_row = cursor.fetchone()
 
@@ -173,7 +163,6 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
         tempo_primeira_faixa = int(price_row[3]) if price_row else 0
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
 
-        # Calculate the total value based on time bands and grace period
         valor_total = 0.0
         total_minutos = tempo.total_seconds() / 60
         if total_minutos <= carencia:
@@ -205,7 +194,6 @@ def move_to_history(placa, entrada, saida, tempo, pagamento):
     except sqlite3.Error as e:
         print("SQLite error:", e)
 
-# Create the tkinter frame and widgets
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
 
@@ -220,7 +208,6 @@ tree['show'] = 'headings'
 tree.heading("#1", text="Placa")
 tree.heading("#2", text="Data de Entrada")
 
-# Set column widths
 tree.column("#1", width=100)
 tree.column("#2", width=150)
 
@@ -232,13 +219,8 @@ treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y
 tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
 treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
 
-
-
-
-# Call the function to update the Listbox with existing entries
 update_entry_list()
 
 tree.bind("<Double-1>", open_entry_details)
 
-# Start the tkinter main loop
 rt.mainloop()

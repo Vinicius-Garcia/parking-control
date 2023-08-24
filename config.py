@@ -89,12 +89,11 @@ def users():
 
             conn.close()
 
-            # Unbind the previous event bindings
         except sqlite3.Error as e:
             print("SQLite error:", e)
 
     def open_users_details(event):
-        selected_item = tree.selection()[0]  # Get the selected item's ID
+        selected_item = tree.selection()[0]
         selected_entry = tree.item(selected_item, "values")
         details_window = tk.Toplevel(rt)
         details_window.title("Users Detail")
@@ -187,10 +186,9 @@ def users():
     treeScroll = tk.Scrollbar(user_window)
     treeScroll.configure(command=tree.yview)
     tree.configure(yscrollcommand=treeScroll.set)
-    treeScroll.pack(side='right', fill='y',padx=(0, 10), pady=10)  # Change side to 'right' and fill to 'y'
+    treeScroll.pack(side='right', fill='y',padx=(0, 10), pady=10)
     tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
 
-    # Call the function to update the Listbox with existing entries
     update_user_list()
 
     tree.bind("<Double-1>", open_users_details)
@@ -330,14 +328,16 @@ def texts():
                 cursor.execute('''CREATE TABLE IF NOT EXISTS texts (
                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                                    text TEXT,
-                                   type TEXT
+                                   type TEXT,
+                                   ordem TEXT
                                )''')
 
                 text_value = text_entry.get()
                 type_value = combo.get()
+                order_value = order_entry.get()
 
-                cursor.execute('INSERT INTO texts (text, type) VALUES (?, ?)',
-                               (text_value, type_value))
+                cursor.execute('INSERT INTO texts (text, type, ordem) VALUES (?, ?, ?)',
+                               (text_value, type_value, order_value))
 
                 conn.commit()
                 conn.close()
@@ -359,6 +359,9 @@ def texts():
         combo = customtkinter.CTkComboBox(adddetails_window, width=300, height=40, values=["PADRÃO SUPERIOR", "TICKET INFERIOR", "RECIBO INFERIOR"])
         combo.pack(pady=12, padx=10)
 
+        order_entry = customtkinter.CTkEntry(adddetails_window, width=300, height=40, placeholder_text="ORDEM")
+        order_entry.pack(pady=12, padx=10)
+
         button = customtkinter.CTkButton(adddetails_window, width=300, height=40, text="CADASTRAR",
                                          command=adicionar_user)
         button.pack(pady=12, padx=24)
@@ -372,13 +375,13 @@ def texts():
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
 
-            cursor.execute("SELECT  text, type,id FROM texts")
+            cursor.execute("SELECT  text, type, ordem, id FROM texts")
             texts = cursor.fetchall()
 
             tree.delete(*tree.get_children())
             for text in texts:
 
-                tree.insert('', tk.END, values=(text[0], text[1], text[2]))
+                tree.insert('', tk.END, values=(text[0], text[1], text[2], text[3]))
 
             conn.close()
 
@@ -397,7 +400,8 @@ def texts():
         # Get the selected entry details
         selected_text = selected_entry[0]
         selected_type = selected_entry[1]
-        selected_id = selected_entry[2]
+        selected_id = selected_entry[3]
+        selected_order = selected_entry[2]
 
 
         def cancel():
@@ -409,8 +413,8 @@ def texts():
                 cursor = conn.cursor()
 
                 cursor.execute(
-                    "UPDATE texts SET text=?, type=? WHERE id=?",
-                    (text.get(), combo.get(), selected_id))
+                    "UPDATE texts SET text=?, type=?, ordem=? WHERE id=?",
+                    (text.get(), combo.get(), selected_id, order_entry.get()))
                 messagebox.showinfo(
                     "Sucesso", "Frase atualizada com sucesso!")
                 details_window.destroy()
@@ -429,8 +433,11 @@ def texts():
         text = customtkinter.CTkEntry(details_window, width=300, height=40, placeholder_text="Texto")
         text.pack(pady=12, padx=10)
 
-        combo = customtkinter.CTkComboBox(details_window, width=300, height=40, values=["TICKET", "RECIBO"])
+        combo = customtkinter.CTkComboBox(adddetails_window, width=300, height=40, values=["PADRÃO SUPERIOR", "TICKET INFERIOR", "RECIBO INFERIOR"])
         combo.pack(pady=12, padx=10)
+
+        order_entry = customtkinter.CTkEntry(adddetails_window, width=300, height=40, placeholder_text="ORDEM")
+        order_entry.pack(pady=12, padx=10)
 
         button = customtkinter.CTkButton(details_window, width=300, height=40, text="ATUALIZAR", command=update_user)
         button.pack(pady=12, padx=24)
@@ -452,14 +459,16 @@ def texts():
     button_add.pack(pady=12, padx=10)
 
     tree = tk.ttk.Treeview(user_window,
-                           columns=("TEXTO", "TIPO"))
+                           columns=("TEXTO", "TIPO", "ORDEM"))
     tree['show'] = 'headings'
     tree.heading("#1", text="TEXTO")
     tree.heading("#2", text="TIPO")
+    tree.heading("#3", text="ORDEM")
 
     # Set column widths
-    tree.column("#1", width=400)
+    tree.column("#1", width=300)
     tree.column("#2", width=150)
+    tree.column("#3", width=50)
 
     treeScroll = tk.Scrollbar(user_window)
     treeScroll.configure(command=tree.yview)

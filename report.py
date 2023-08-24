@@ -27,12 +27,11 @@ def update_entry_list(start_date, end_date):
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento  FROM history WHERE data_entrada BETWEEN ? AND ?",
+            "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento  FROM history WHERE data_saida BETWEEN ? AND ?",
             (start_date, end_date))
         entries = cursor.fetchall()
         print(entries)
         tree.delete(*tree.get_children())
-        # Clear existing items in the Treeview
         for item in tree.get_children():
             tree.delete(item)
 
@@ -171,7 +170,6 @@ tree.heading("#4", text="Tempo de Permanência")
 tree.heading("#5", text="Valor Pago")
 tree.heading("#6", text="Pagamento")
 
-# Set column widths
 tree.column("#1", width=100)
 tree.column("#2", width=150)
 tree.column("#3", width=150)

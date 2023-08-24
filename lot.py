@@ -20,12 +20,10 @@ config.read("config.ini")
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
-# Create the main tkinter window
 rt = customtkinter.CTk()
 rt.after(0, lambda:rt.state('zoomed'))
 
 
-# Validation function for entry length
 def validate_length(P):
     if len(P) <= 7:
         return True
@@ -40,15 +38,12 @@ def plate_exists(placa):
     conn.close()
     return result is not None
 
-# Function to insert an entry into the database
 def send_entry():
     placa = entry1.get()
-    # Connect to the database
     try:
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
 
-        # Create the 'entry' table if it doesn't exist
         cursor.execute('''CREATE TABLE IF NOT EXISTS entry
                       (placa TEXT, data TEXT)''')
 
@@ -58,19 +53,16 @@ def send_entry():
             messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
             return
 
-        # Save placa and data in the table
         data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         cursor.execute("INSERT INTO entry (placa, data) VALUES (?, ?)", (placa, data_atual))
 
         conn.commit()
         conn.close()
 
-        # Update the Listbox with the new entry
         update_entry_list()
     except sqlite3.Error as e:
         print("SQLite error:", e)
 
-# Function to open a new window and display selected entry details
 def open_entry_details(event):
         selected_item = tree.selection()[0]  # Get the selected item's ID
         selected_entry = tree.item(selected_item, "values")
@@ -79,13 +71,11 @@ def open_entry_details(event):
         details_window.geometry("400x450")
         details_window.configure(bg="#212121")
 
-        placa = selected_entry[0]  # Assuming the first value is the "Placa"
+        placa = selected_entry[0]
         data = selected_entry[1]
-        # Get the selected entry details
         selected_entry = placa
         selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
-        # Format the selected time in Brazilian Portuguese (pt-br) format
         locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
         formatted_time = selected_time.strftime('%d/%m/%Y %H:%M:%S')
 
@@ -95,7 +85,6 @@ def open_entry_details(event):
         details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text="TICKET", font=("Roboto", 24))
         details_label.pack(pady=6, padx=10)
 
-        # Generate and display QR Code
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -142,7 +131,6 @@ def print_entry(placa, data):
 
         p.cut()
 
-        # Close the details_window after printing
         details_window.destroy()
 
     except Exception as e:
@@ -159,7 +147,6 @@ def update_entry_list():
         cursor.execute("SELECT placa, data FROM entry")
         entries = cursor.fetchall()
         tree.delete(*tree.get_children())
-        #listbox.delete(0, tk.END)  # Clear the current list
 
         for entry in entries:
             entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
@@ -173,11 +160,10 @@ def update_entry_list():
 def handle_listbox_click():
     selected_indices = listbox.curselection()
     if selected_indices:
-        selected_index = selected_indices[0]  # Get the first selected index
+        selected_index = selected_indices[0]
         selected_item = listbox.get(selected_index)
         open_entry_details(selected_item)
 
-# Create the tkinter frame and widgets
 fr = customtkinter.CTkFrame(master=rt)
 fr.pack(pady=40, padx=120, fill="both", expand=True)
 
@@ -190,7 +176,6 @@ tree['show'] = 'headings'
 tree.heading("#1", text="Placa")
 tree.heading("#2", text="Data de Entrada")
 
-# Set column widths
 tree.column("#1", width=100)
 tree.column("#2", width=150)
 
@@ -198,16 +183,13 @@ tree.column("#2", width=150)
 treeScroll = tk.Scrollbar(master=fr)
 treeScroll.configure(command=tree.yview)
 tree.configure(yscrollcommand=treeScroll.set)
-treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
+treeScroll.pack(side='right', fill='y')
 tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
 treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
 
 
-
-# Call the function to update the Listbox with existing entries
 update_entry_list()
 
 tree.bind("<Double-1>", open_entry_details)
 
-# Start the tkinter main loop
 rt.mainloop()
