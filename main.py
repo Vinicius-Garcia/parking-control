@@ -1346,11 +1346,11 @@ def MenuConfig():
             text = customtkinter.CTkEntry(details_window, width=300, height=40, placeholder_text="Texto")
             text.pack(pady=12, padx=10)
 
-            combo = customtkinter.CTkComboBox(adddetails_window, width=300, height=40,
+            combo = customtkinter.CTkComboBox(details_window, width=300, height=40,
                                               values=["PADRÃO SUPERIOR", "TICKET INFERIOR", "RECIBO INFERIOR"])
             combo.pack(pady=12, padx=10)
 
-            order_entry = customtkinter.CTkEntry(adddetails_window, width=300, height=40, placeholder_text="ORDEM")
+            order_entry = customtkinter.CTkEntry(details_window, width=300, height=40, placeholder_text="ORDEM")
             order_entry.pack(pady=12, padx=10)
 
             button = customtkinter.CTkButton(details_window, width=300, height=40, text="ATUALIZAR",
