@@ -1,4 +1,7 @@
+import sqlite3
 
+conn = sqlite3.connect('user_data.db')
+cursor = conn.cursor()
 
 def MenuLogin():
     import customtkinter
@@ -15,13 +18,10 @@ def MenuLogin():
         username = entry1.get()
         password = entry2.get()
 
-        conn = sqlite3.connect("user_data.db")
-        cursor = conn.cursor()
 
         cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
         user = cursor.fetchone()
 
-        conn.close()
         user_type = user[4]
 
         if user:
@@ -67,8 +67,6 @@ def MenuRegister():
     rt.after(0, lambda: rt.state('zoomed'))
 
     def add_to_database():
-        conn = sqlite3.connect("user_data.db")
-        cursor = conn.cursor()
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -88,8 +86,6 @@ def MenuRegister():
         cursor.execute('INSERT INTO users (full_name, username, password, role) VALUES (?, ?, ?, ?)',
                        (full_name, username, password, role))
 
-        conn.commit()
-        conn.close()
 
     def reg():
         add_to_database()
@@ -124,81 +120,6 @@ def MenuRegister():
                                       command=switch_to_login_screen)
     button1.pack(pady=12, padx=10)
 
-    rt.mainloop()
-
-def MenuGeral(type_user):
-    import customtkinter
-    import os
-    import sqlite3
-    import sys
-
-    print("User type:", type_user)
-    user_type = type_user
-
-    customtkinter.set_appearance_mode("dark")
-    customtkinter.set_default_color_theme("dark-blue")
-
-    rt = customtkinter.CTk()
-    rt.after(0, lambda: rt.state('zoomed'))
-
-    # Funções para os botões
-    def open_entrada():
-        MenuEntry()
-
-    def open_saida():
-        MenuExit()
-
-    def open_patio():
-        MenuLot()
-
-    def open_relatorio():
-        if user_type == "GERENTE":
-            MenuReport()
-        else:
-            # Mostrar uma mensagem ou desabilitar o botão de relatório para usuários não autorizados
-            button4.configure(state="disabled")  # Desabilita o botão de relatório
-
-    def open_config():
-        if user_type == "GERENTE":
-            MenuConfig()
-        else:
-            # Mostrar uma mensagem ou desabilitar o botão de configuração para usuários não autorizados
-            button5.configure(state="disabled")  # Desabilita o botão de configuração
-
-    def logout():
-        rt.destroy()
-        MenuLogin()
-    fr = customtkinter.CTkFrame(master=rt)
-    fr.pack(pady=40, padx=120, fill="both", expand=True)
-
-    label = customtkinter.CTkLabel(master=fr, width=120, height=48, text="MENU", font=("Roboto", 48))
-    label.pack(pady=(150, 10), padx=10)
-
-    button1 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR ENTRADA", command=open_entrada)
-    button1.pack(pady=12, padx=10)
-
-    button2 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR SAÍDA", command=open_saida)
-    button2.pack(pady=12, padx=10)
-
-    button3 = customtkinter.CTkButton(master=fr, width=480, height=48, text="PÁTIO", command=open_patio)
-    button3.pack(pady=12, padx=10)
-
-    button4 = customtkinter.CTkButton(master=fr, width=480, height=48, text="RELATÓRIO", command=open_relatorio)
-    button4.pack(pady=12, padx=10)
-
-    button5 = customtkinter.CTkButton(master=fr, width=480, height=48, text="CONFIGURAÇÃO", command=open_config)
-    button5.pack(pady=12, padx=10)
-
-    if user_type != "GERENTE":
-        print(user_type)
-        button4.configure(state="disabled")
-        button5.configure(state="disabled")
-
-    button6 = customtkinter.CTkButton(master=fr, width=480, height=48, text="LOGOUT", fg_color='#91403d',
-                                      command=logout)
-    button6.pack(pady=12, padx=10)
-
-    # Inicia a aplicação
     rt.mainloop()
 
 def MenuEntry():
@@ -239,11 +160,8 @@ def MenuEntry():
             return False
 
     def plate_exists(placa):
-        conn = sqlite3.connect('user_data.db')
-        cursor = conn.cursor()
         cursor.execute("SELECT placa FROM entry WHERE placa = ?", (placa,))
         result = cursor.fetchone()
-        conn.close()
         return result is not None
 
     # Function to insert an entry into the database
@@ -251,8 +169,6 @@ def MenuEntry():
         placa = entry1.get()
         # Connect to the database
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
 
             # Create the 'entry' table if it doesn't exist
             cursor.execute('''CREATE TABLE IF NOT EXISTS entry
@@ -266,8 +182,6 @@ def MenuEntry():
             data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             cursor.execute("INSERT INTO entry (placa, data) VALUES (?, ?)", (placa, data_atual))
 
-            conn.commit()
-            conn.close()
 
             # Update the Listbox with the new entry
             update_entry_list()
@@ -331,8 +245,6 @@ def MenuEntry():
             hdc.EndPage()
 
     def print_entry(placa, data):
-        conn = sqlite3.connect('user_data.db')
-        cursor = conn.cursor()
 
         cursor.execute("SELECT text, type, ordem FROM texts")
         texts = cursor.fetchall()
@@ -391,7 +303,6 @@ def MenuEntry():
 
         y_position += 250  # Adjust y-position after QR code
 
-        print()
         pdc.TextOut(0, y_position, "PLACA: ")
         pdc.TextOut((width - pdc.GetTextExtent(placa)[0]), y_position, placa)
         y_position += 50  # Adjust y-position after PLACA text
@@ -415,8 +326,6 @@ def MenuEntry():
 
     def update_entry_list():
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
 
             cursor.execute("SELECT placa, data FROM entry")
             entries = cursor.fetchall()
@@ -427,7 +336,6 @@ def MenuEntry():
                 entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
                 tree.insert('', tk.END, values=(entry[0], entry[1]))
 
-            conn.close()
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
@@ -550,12 +458,9 @@ def MenuExit():
         details_label.pack(pady=6, padx=10, anchor="w")
 
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
             cursor.execute(
                 "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
             price_row = cursor.fetchone()
-            conn.close()
         except sqlite3.Error as e:
             print("SQLite error:", e)
             price_row = None
@@ -604,12 +509,9 @@ def MenuExit():
             pagamento = combo.get()
 
             def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento):
-                conn = sqlite3.connect('user_data.db')
-                cursor = conn.cursor()
 
                 cursor.execute("SELECT text, type, ordem FROM texts")
                 texts = cursor.fetchall()
-
                 padrão_superior_texts = [text for text in texts if text[1] == 'PADRÃO SUPERIOR']
                 recibo_inferior = [text for text in texts if text[1] == 'RECIBO INFERIOR']
                 padrão_inferior_texts = [text for text in texts if text[1] == 'TICKET INFERIOR']
@@ -679,8 +581,7 @@ def MenuExit():
                 details_window.destroy()
 
             try:
-                conn = sqlite3.connect('user_data.db')
-                cursor = conn.cursor()
+
 
                 cursor.execute('''CREATE TABLE IF NOT EXISTS history (
                                       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -727,8 +628,6 @@ def MenuExit():
 
                 cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
 
-                conn.commit()
-                conn.close()
                 print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento)
                 update_entry_list()
 
@@ -742,8 +641,6 @@ def MenuExit():
 
     def update_entry_list():
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
 
             cursor.execute("SELECT placa, data FROM entry")
             entries = cursor.fetchall()
@@ -753,7 +650,6 @@ def MenuExit():
             for entry in entries:
                 tree.insert('', tk.END, values=(entry[0], entry[1]))
 
-            conn.close()
         except sqlite3.Error as e:
             print("SQLite error:", e)
 
@@ -827,18 +723,14 @@ def MenuLot():
             return False
 
     def plate_exists(placa):
-        conn = sqlite3.connect('user_data.db')
-        cursor = conn.cursor()
+
         cursor.execute("SELECT placa FROM entry WHERE placa = ?", (placa,))
         result = cursor.fetchone()
-        conn.close()
         return result is not None
 
     def send_entry():
         placa = entry1.get()
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
 
             cursor.execute('''CREATE TABLE IF NOT EXISTS entry
                           (placa TEXT, data TEXT)''')
@@ -850,8 +742,6 @@ def MenuLot():
             data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             cursor.execute("INSERT INTO entry (placa, data) VALUES (?, ?)", (placa, data_atual))
 
-            conn.commit()
-            conn.close()
 
             update_entry_list()
         except sqlite3.Error as e:
@@ -912,8 +802,6 @@ def MenuLot():
             hdc.EndPage()
 
     def print_entry(placa, data):
-        conn = sqlite3.connect('user_data.db')
-        cursor = conn.cursor()
 
         cursor.execute("SELECT text, type, ordem FROM texts")
         texts = cursor.fetchall()
@@ -996,8 +884,6 @@ def MenuLot():
 
     def update_entry_list():
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
 
             cursor.execute("SELECT placa, data FROM entry")
             entries = cursor.fetchall()
@@ -1007,7 +893,6 @@ def MenuLot():
                 entry_str = f"Placa: {entry[0]} - Data: {entry[1]}"
                 tree.insert('', tk.END, values=(entry[0], entry[1]))
 
-            conn.close()
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
@@ -1074,8 +959,6 @@ def MenuConfig():
 
             def adicionar_user():
                 try:
-                    conn = sqlite3.connect('user_data.db')
-                    cursor = conn.cursor()
                     cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                                     full_name TEXT,
@@ -1092,8 +975,6 @@ def MenuConfig():
                     cursor.execute('INSERT INTO users (full_name, username, password, role) VALUES (?, ?, ?, ?)',
                                    (full_name, username, password, role))
 
-                    conn.commit()
-                    conn.close()
                     messagebox.showinfo(
                         "Sucesso", "Usuário cadastrado com sucesso!")
                     adddetails_window.destroy()
@@ -1130,16 +1011,13 @@ def MenuConfig():
 
         def update_user_list():
             try:
-                conn = sqlite3.connect('user_data.db')
-                cursor = conn.cursor()
 
-                cursor.execute("SELECT full_name, username, password, role FROM users")
+                cursor.execute("SELECT full_name, username, password, role, id FROM users")
                 users = cursor.fetchall()
                 tree.delete(*tree.get_children())
                 for user in users:
-                    tree.insert('', tk.END, values=(user[0], user[1], user[2], user[3]))
+                    tree.insert('', tk.END, values=(user[0], user[1], user[2], user[3], user[4]))
 
-                conn.close()
 
             except sqlite3.Error as e:
                 print("SQLite error:", e)
@@ -1161,14 +1039,14 @@ def MenuConfig():
             print(selected_password)
             selected_role = selected_entry[3]
             print(selected_role)
+            selected_id = selected_entry[4]
+            print(selected_id)
 
             def cancel():
                 details_window.destroy()
 
             def update_user():
                 try:
-                    conn = sqlite3.connect('user_data.db')
-                    cursor = conn.cursor()
 
                     cursor.execute(
                         "UPDATE users SET full_name=?, username=?, password=?, role=? WHERE id=?",
@@ -1178,8 +1056,6 @@ def MenuConfig():
                     details_window.destroy()
                     update_user_list()
 
-                    conn.commit()
-                    conn.close()
 
                 except sqlite3.Error as e:
                     print("SQLite error:", e)
@@ -1257,8 +1133,6 @@ def MenuConfig():
                 print(carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,
                       demais_faixas_val)
 
-                conn = sqlite3.connect('user_data.db')
-                cursor = conn.cursor()
                 cursor.execute('''CREATE TABLE IF NOT EXISTS price (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                                     carencia TEXT,
@@ -1290,8 +1164,6 @@ def MenuConfig():
                         "Sucesso", "Valores inseridos na tabela de preço com sucesso!")
                     price_window.destroy()
 
-                conn.commit()
-                conn.close()
 
             except sqlite3.Error as e:
                 print("aqui")
@@ -1299,8 +1171,6 @@ def MenuConfig():
 
         def populate_entries():
             try:
-                conn = sqlite3.connect('user_data.db')
-                cursor = conn.cursor()
 
                 cursor.execute("SELECT * FROM price LIMIT 1")
                 row = cursor.fetchone()
@@ -1312,7 +1182,7 @@ def MenuConfig():
                     demais_faixas_entry.insert(0, row[4])
                     demais_faixas_min_entry.insert(0, row[5])
 
-                conn.close()
+
 
             except sqlite3.Error as e:
 
@@ -1376,8 +1246,6 @@ def MenuConfig():
 
             def adicionar_user():
                 try:
-                    conn = sqlite3.connect('user_data.db')
-                    cursor = conn.cursor()
                     cursor.execute('''CREATE TABLE IF NOT EXISTS texts (
                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                                        text TEXT,
@@ -1392,8 +1260,6 @@ def MenuConfig():
                     cursor.execute('INSERT INTO texts (text, type, ordem) VALUES (?, ?, ?)',
                                    (text_value, type_value, order_value))
 
-                    conn.commit()
-                    conn.close()
                     messagebox.showinfo(
                         "Sucesso", "Texto cadastrado com sucesso!")
                     adddetails_window.destroy()
@@ -1427,8 +1293,6 @@ def MenuConfig():
 
         def update_user_list():
             try:
-                conn = sqlite3.connect('user_data.db')
-                cursor = conn.cursor()
 
                 cursor.execute("SELECT  text, type, ordem, id FROM texts")
                 texts = cursor.fetchall()
@@ -1437,7 +1301,7 @@ def MenuConfig():
                 for text in texts:
                     tree.insert('', tk.END, values=(text[0], text[1], text[2], text[3]))
 
-                conn.close()
+
 
 
             except sqlite3.Error as e:
@@ -1462,8 +1326,6 @@ def MenuConfig():
 
             def update_user():
                 try:
-                    conn = sqlite3.connect('user_data.db')
-                    cursor = conn.cursor()
 
                     cursor.execute(
                         "UPDATE texts SET text=?, type=?, ordem=? WHERE id=?",
@@ -1473,8 +1335,6 @@ def MenuConfig():
                     details_window.destroy()
                     update_user_list()
 
-                    conn.commit()
-                    conn.close()
 
                 except sqlite3.Error as e:
                     print("SQLite error:", e)
@@ -1579,8 +1439,6 @@ def MenuReport():
 
     def update_entry_list(start_date, end_date):
         try:
-            conn = sqlite3.connect('user_data.db')
-            cursor = conn.cursor()
 
             cursor.execute(
                 "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento  FROM history WHERE data_saida BETWEEN ? AND ?",
@@ -1594,7 +1452,6 @@ def MenuReport():
                 placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento = entry
                 tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento))
 
-            conn.close()
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
@@ -1726,6 +1583,81 @@ def MenuReport():
 
     tree.pack(fill="both", expand=True, padx=(10, 0), pady=10)
 
+    rt.mainloop()
+
+def MenuGeral(type_user):
+    import customtkinter
+    import os
+    import sqlite3
+    import sys
+
+    print("User type:", type_user)
+    user_type = type_user
+
+    customtkinter.set_appearance_mode("dark")
+    customtkinter.set_default_color_theme("dark-blue")
+
+    rt = customtkinter.CTk()
+    rt.after(0, lambda: rt.state('zoomed'))
+
+    # Funções para os botões
+    def open_entrada():
+        MenuEntry()
+
+    def open_saida():
+        MenuExit()
+
+    def open_patio():
+        MenuLot()
+
+    def open_relatorio():
+        if user_type == "GERENTE":
+            MenuReport()
+        else:
+            # Mostrar uma mensagem ou desabilitar o botão de relatório para usuários não autorizados
+            button4.configure(state="disabled")  # Desabilita o botão de relatório
+
+    def open_config():
+        if user_type == "GERENTE":
+            MenuConfig()
+        else:
+            # Mostrar uma mensagem ou desabilitar o botão de configuração para usuários não autorizados
+            button5.configure(state="disabled")  # Desabilita o botão de configuração
+
+    def logout():
+        rt.destroy()
+        MenuLogin()
+    fr = customtkinter.CTkFrame(master=rt)
+    fr.pack(pady=40, padx=120, fill="both", expand=True)
+
+    label = customtkinter.CTkLabel(master=fr, width=120, height=48, text="MENU", font=("Roboto", 48))
+    label.pack(pady=(150, 10), padx=10)
+
+    button1 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR ENTRADA", command=open_entrada)
+    button1.pack(pady=12, padx=10)
+
+    button2 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR SAÍDA", command=open_saida)
+    button2.pack(pady=12, padx=10)
+
+    button3 = customtkinter.CTkButton(master=fr, width=480, height=48, text="PÁTIO", command=open_patio)
+    button3.pack(pady=12, padx=10)
+
+    button4 = customtkinter.CTkButton(master=fr, width=480, height=48, text="RELATÓRIO", command=open_relatorio)
+    button4.pack(pady=12, padx=10)
+
+    button5 = customtkinter.CTkButton(master=fr, width=480, height=48, text="CONFIGURAÇÃO", command=open_config)
+    button5.pack(pady=12, padx=10)
+
+    if user_type != "GERENTE":
+        print(user_type)
+        button4.configure(state="disabled")
+        button5.configure(state="disabled")
+
+    button6 = customtkinter.CTkButton(master=fr, width=480, height=48, text="LOGOUT", fg_color='#91403d',
+                                      command=logout)
+    button6.pack(pady=12, padx=10)
+
+    # Inicia a aplicação
     rt.mainloop()
 
 

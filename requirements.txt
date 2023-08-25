@@ -8,3 +8,4 @@ openpyxl==3.1.2
 tkcalendar==1.6.1
 python-escpos==2.2.0
 ConfigParser==6.0.0
+reportlab==4.0.4
