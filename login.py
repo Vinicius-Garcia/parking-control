@@ -13,25 +13,20 @@ def login():
     username = entry1.get()
     password = entry2.get()
 
-    conn = sqlite3.connect("user_data.db")
-    cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
     user = cursor.fetchone()
 
-    conn.close()
     user_type = user[4]
 
     if user:
         rt.destroy()  # Fecha a janela de login
-        os.system(f"python menu.py {user_type} ")  # Abre a tela de controle
+        os.system(f'python menu.py {user_type}')
     else:
         label_status.config(text="Login failed. Please try again.")
 
 
 def switch_to_register_screen():
-    rt.destroy()  # Fecha a janela atual
-    os.system("python register.py")  # Abre a tela de registro
+    os.system('python register.py')
 
 
 fr = customtkinter.CTkFrame(master=rt)
@@ -54,5 +49,3 @@ register_button = customtkinter.CTkButton(master=fr, width=480, height=48, text=
 register_button.pack(pady=12, padx=10)
 
 rt.mainloop()
-
-

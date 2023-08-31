@@ -37,7 +37,6 @@ def MenuLogin():
             label_status.config(text="Login failed. Please try again.")
 
     def switch_to_register_screen():
-        rt.destroy()  # Fecha a janela atual
         MenuRegister()
 
     fr = customtkinter.CTkFrame(master=rt)
@@ -65,6 +64,7 @@ def MenuRegister():
     import customtkinter
     import os
     import sqlite3
+    from tkinter import messagebox
 
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
@@ -73,6 +73,29 @@ def MenuRegister():
     rt.after(0, lambda: rt.state('zoomed'))
 
     def add_to_database():
+
+        full_name = firstname.get()
+        username = entry1.get()
+        password = entry2.get()
+        role = combo.get()
+
+        # Check for empty fields
+        if not full_name or not username or not password or not role:
+            messagebox.showwarning("Erro", "Por favor, preencha todos os campos.")
+            return
+
+        # Check for duplicate username
+        conn = sqlite3.connect("user_data.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
+        existing_username = cursor.fetchone()
+
+        if existing_username:
+            conn.close()
+            messagebox.showwarning("Erro", "O nome de usuário já está em uso.")
+
+            return
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -84,14 +107,11 @@ def MenuRegister():
             )
         ''')
 
-        full_name = firstname.get()
-        username = entry1.get()
-        password = entry2.get()
-        role = combo.get()
-
         cursor.execute('INSERT INTO users (full_name, username, password, role) VALUES (?, ?, ?, ?)',
                        (full_name, username, password, role))
 
+        conn.commit()
+        conn.close()
 
     def reg():
         add_to_database()
@@ -99,7 +119,7 @@ def MenuRegister():
 
     def switch_to_login_screen():
         rt.destroy()
-        MenuLogin()
+        os.system("python login.py")
 
     fr = customtkinter.CTkFrame(master=rt)
     fr.pack(pady=30, padx=120, fill="both", expand=True)
@@ -127,6 +147,7 @@ def MenuRegister():
     button1.pack(pady=12, padx=10)
 
     rt.mainloop()
+
 
 def MenuEntry():
     import customtkinter
