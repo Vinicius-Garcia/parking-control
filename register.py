@@ -1,6 +1,7 @@
 import customtkinter
 import os
 import sqlite3
+from CTkMessagebox  import  CTkMessagebox
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -9,6 +10,16 @@ rt = customtkinter.CTk()
 rt.after(0, lambda:rt.state('zoomed'))
 
 def add_to_database():
+    full_name = firstname.get()
+    username = entry1.get()
+    password = entry2.get()
+    role = combo.get()
+
+    # Check for empty fields
+    if not full_name or not username or not password or not role:
+        CTkMessagebox("Erro", "Por favor, preencha todos os campos.")
+        return
+
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
 
