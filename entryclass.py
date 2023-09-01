@@ -35,7 +35,7 @@ class Entry(customtkinter.CTk):
         self.search.pack(pady=40, padx=120)
 
         self.labelplaca = customtkinter.CTkLabel(self.search, width=120, height=32, text="PLACA:", font=("Roboto", 18))
-        self.labelplaca.pack(pady=12, padx=10, side="left")
+        self.labelplaca.pack(pady=12, padx=(10,1), side="left")
 
         self.entry1 = customtkinter.CTkEntry(self.search, width=240, height=32, placeholder_text="PLACA",
                                              validate="key",

@@ -36,11 +36,11 @@ class Exit(customtkinter.CTk):
         self.search.pack(pady=40, padx=120)
 
         self.label = customtkinter.CTkLabel(self.search, width=120, height=32, text="PLACA", font=("Roboto", 20))
-        self.label.pack(pady=12, padx=10, side="left")
+        self.label.pack(pady=12, padx=(10, 0), side="left")
 
         self.entry1 = customtkinter.CTkEntry(self.search, width=240, height=32, placeholder_text="PLACA", validate="key",
                                         validatecommand=(self.register(validate_length), '%P'))
-        self.entry1.pack(pady=12, padx=10, side="left")
+        self.entry1.pack(pady=12, padx=(0,10), side="left")
 
         self.button = customtkinter.CTkButton(self.search, width=240, height=32, text="DAR SAIDA", command=self.dar_saida)
         self.button.pack(pady=12, padx=10, side="left")
