@@ -6,27 +6,27 @@ from reportclass import Report
 from lotclass import Lot
 from entryclass import Entry
 class Menu(customtkinter.CTk):
-    def __init__(self, type_user):
+    def __init__(self, type_user, user):
         super().__init__()
         self.after(0, lambda: self.state('zoomed'))
-
-        self.setup_ui(type_user)
+        self.user = user
+        self.setup_ui(type_user, user)
         self.mainloop()
 
-    def setup_ui(self, type_user):
-        print("User type:", type_user)
+    def setup_ui(self, type_user, user):
+        print("User type:", type_user, user)
         user_type = type_user
 
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-        label = customtkinter.CTkLabel(master=fr, width=120, height=48, text="MENU", font=("Roboto", 48))
+        label = customtkinter.CTkLabel(master=fr, width=120, height=48, text="GESTÃO DE ESTACIONAMENTO", font=("Roboto", 48))
         label.pack(pady=(150, 10), padx=10)
 
-        button1 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR ENTRADA", command=self.open_entrada)
+        button1 = customtkinter.CTkButton(master=fr, width=480, height=48, text="REGISTRAR ENTRADA", command=self.open_entrada)
         button1.pack(pady=12, padx=10)
 
-        button2 = customtkinter.CTkButton(master=fr, width=480, height=48, text="DAR SAÍDA", command=self.open_saida)
+        button2 = customtkinter.CTkButton(master=fr, width=480, height=48, text="REGISTRAR SAÍDA", command=self.open_saida)
         button2.pack(pady=12, padx=10)
 
         if user_type == "GERENTE" or user_type == "MASTER":
@@ -48,10 +48,10 @@ class Menu(customtkinter.CTk):
 
     # Funções para os botões
     def open_entrada(self):
-        Entry()
+        Entry(self.user)
 
     def open_saida(self):
-        Exit()
+        Exit(self.user)
 
     def open_patio(self):
         Lot()

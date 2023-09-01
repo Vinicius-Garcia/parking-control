@@ -83,7 +83,7 @@ class Report(customtkinter.CTk):
         self.tree = tk.ttk.Treeview(master=fr,
                                columns=(
                                "Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago",
-                               "Pagamento"))
+                               "Pagamento","Veiculo" ,"Operador Entrada", "Operador Saída"))
         self.tree['show'] = 'headings'
         self.tree.heading("#1", text="Placa")
         self.tree.heading("#2", text="Data de Entrada")
@@ -91,13 +91,19 @@ class Report(customtkinter.CTk):
         self.tree.heading("#4", text="Tempo de Permanência")
         self.tree.heading("#5", text="Valor Pago")
         self.tree.heading("#6", text="Pagamento")
+        self.tree.heading("#7", text="Veiculo")
+        self.tree.heading("#8", text="Operador Entrada")
+        self.tree.heading("#9", text="Operador Saída")
 
-        self.tree.column("#1", width=100)
-        self.tree.column("#2", width=150)
-        self.tree.column("#3", width=150)
-        self.tree.column("#4", width=150)
-        self.tree.column("#5", width=150)
-        self.tree.column("#6", width=150)
+        self.tree.column("#1", width=50)
+        self.tree.column("#2", width=100)
+        self.tree.column("#3", width=100)
+        self.tree.column("#4", width=100)
+        self.tree.column("#5", width=100)
+        self.tree.column("#6", width=100)
+        self.tree.column("#7", width=50)
+        self.tree.column("#8", width=100)
+        self.tree.column("#9", width=100)
 
         self.treeScroll = tk.Scrollbar(master=fr)
         self.treeScroll.configure(command=self.tree.yview)
@@ -113,7 +119,7 @@ class Report(customtkinter.CTk):
             cursor = conn.cursor()
 
             cursor.execute(
-                "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento, veiculo  FROM history WHERE data_saida BETWEEN ? AND ?",
+                "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento, veiculo, operador_entrada, operador_saida  FROM history WHERE data_saida BETWEEN ? AND ?",
                 (start_date, end_date))
             entries = cursor.fetchall()
             self.tree.delete(*self.tree.get_children())
@@ -121,8 +127,8 @@ class Report(customtkinter.CTk):
                 self.tree.delete(item)
 
             for entry in entries:
-                placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo = entry
-                self.tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo))
+                placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida = entry
+                self.tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida))
 
             cursor.close()
 

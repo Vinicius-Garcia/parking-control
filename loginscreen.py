@@ -17,6 +17,27 @@ class Login(customtkinter.CTk):
         self.mainloop()
 
     def setup_ui(self):
+        conn = sqlite3.connect('user_data.db')
+        cursor = conn.cursor()
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS price (
+                                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                   carencia TEXT,
+                                                   primeira_faixa TEXT,
+                                                   primeira_faixa_min TEXT,
+                                                   segunda_faixa TEXT,
+                                                   segunda_faixa_min TEXT,
+                                                   demais_faixas TEXT,
+                                                   demais_faixas_min TEXT
+                                               )''')
+
+        cursor.execute(
+            "INSERT INTO price (carencia, primeira_faixa, primeira_faixa_min, segunda_faixa, segunda_faixa_min, demais_faixas, demais_faixas_min) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                10, 10, 10, 10,
+                10, 10, 10,))
+        conn.commit()
+        cursor.close()
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
@@ -28,6 +49,9 @@ class Login(customtkinter.CTk):
 
         self.entry2 = customtkinter.CTkEntry(master=fr, width=480, height=48, placeholder_text="Senha", show="*")
         self.entry2.pack(pady=12, padx=10)
+
+        self.entry2.bind("<Return>", self.enter_pressed)
+
 
         self.button = customtkinter.CTkButton(master=fr, width=480, height=48, text="Login", command=self.loginfunction)
         self.button.pack(pady=12, padx=10)
@@ -49,10 +73,13 @@ class Login(customtkinter.CTk):
         user_type = user[4]
 
         if user:
-            Menu(user_type)
+            Menu(user_type, user)
            # self.destroy()  # Fecha a janela de login
         else:
             self.label_status.config(text="Login failed. Please try again.")
+
+    def enter_pressed(self,event):
+        self.loginfunction()
 
 
 if __name__ == "__main__":

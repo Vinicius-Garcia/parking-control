@@ -14,14 +14,18 @@ def validate_length(P):
     if len(P) <= 7:
         return True
     else:
+        messagebox.showerror("Erro de entrada", "A placa deve conter 7 caracteres.")
         return False
 
 class Entry(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
         self.after(0, lambda: self.state('zoomed'))
+        self.user = user
         self.vehicle_type = tk.StringVar()
         self.vehicle_type.set("CARRO")
+        self.details_window = None
+        self.details_window_open = False
         self.setup_ui()
         self.mainloop()
     def setup_ui(self):
@@ -52,12 +56,12 @@ class Entry(customtkinter.CTk):
         self.button.pack(pady=12, padx=10, side="left")
 
         self.tree = tk.ttk.Treeview(master=fr,
-                               columns=("Placa", "Data de Entrada", "Veiculo"), selectmode="browse")
+                               columns=("Placa", "Data de Entrada", "Veículo"), selectmode="browse")
 
         self.tree['show'] = 'headings'
         self.tree.heading("#1", text="Placa")
         self.tree.heading("#2", text="Data de Entrada")
-        self.tree.heading("#3", text="Veiculo")
+        self.tree.heading("#3", text="Veículo")
 
         # Set column widths
         self.tree.column("#1", width=100)
@@ -98,16 +102,16 @@ class Entry(customtkinter.CTk):
             cursor = conn.cursor()
 
             cursor.execute('''CREATE TABLE IF NOT EXISTS entry
-                             (placa TEXT, data TEXT, veiculo TEXT)''')
+                             (placa TEXT, data TEXT, operador_entrada TEXT, veiculo TEXT)''')
 
             if self.plate_exists(placa):
                 cursor.close()
-                messagebox.showwarning("Plate Exists", "Plate already exists in the database.")
+                messagebox.showwarning("Registro de Entrada", "Placa já existente no sistema.")
                 return
 
             data_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
-            cursor.execute("INSERT INTO entry (placa, data, veiculo) VALUES (?, ?, ?)", (placa, data_atual, veiculo))
+            cursor.execute("INSERT INTO entry (placa, data, veiculo, operador_entrada) VALUES (?, ?, ?, ?)", (placa, data_atual, veiculo, self.user[1]))
 
             conn.commit()  # Commit the changes to the database
 
@@ -119,6 +123,11 @@ class Entry(customtkinter.CTk):
 
         # Function to open a new window and display selected entry details
     def open_entry_details(self,event):
+            if self.details_window_open:
+                return
+            if self.details_window is not None:
+                self.details_window.destroy()
+
             selected_item = self.tree.selection()[0]  # Get the selected item's ID
             selected_entry = self.tree.item(selected_item, "values")
             details_window = tk.Toplevel(self)
@@ -156,6 +165,8 @@ class Entry(customtkinter.CTk):
             self.button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET",
                                              command=lambda: self.print_entry(selected_entry, formatted_time))
             self.button.pack(pady=12, padx=10)
+
+            details_window.protocol("WM_DELETE_WINDOW", self.on_details_window_close)
 
 
     def draw_img(self,hdc, dib, maxh, maxw, y_position):
@@ -294,6 +305,11 @@ class Entry(customtkinter.CTk):
 
     def run(self):
         self.mainloop()
+
+    def on_details_window_close(self):
+        self.details_window_open = False  # Marque a janela de detalhes como fechada
+        if self.details_window is not None:
+            self.details_window.destroy()
 
 if __name__ == "__main__":
     app = Entry()

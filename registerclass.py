@@ -52,6 +52,16 @@ class UserRegistrationApp(customtkinter.CTk):
         conn = sqlite3.connect("user_data.db")
         cursor = conn.cursor()
 
+        cursor.execute('''
+                       CREATE TABLE IF NOT EXISTS users (
+                           id INTEGER PRIMARY KEY,
+                           full_name TEXT,
+                           username TEXT,
+                           password TEXT,
+                           role TEXT
+                       )
+                   ''')
+
         cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
         existing_username = cursor.fetchone()
 
@@ -60,15 +70,7 @@ class UserRegistrationApp(customtkinter.CTk):
             messagebox.showwarning("Erro", "O nome de usuário já está em uso.")
             return
 
-        cursor.execute('''
-               CREATE TABLE IF NOT EXISTS users (
-                   id INTEGER PRIMARY KEY,
-                   full_name TEXT,
-                   username TEXT,
-                   password TEXT,
-                   role TEXT
-               )
-           ''')
+
 
         cursor.execute('INSERT INTO users (full_name, username, password, role) VALUES (?, ?, ?, ?)',
                        (full_name, username, password, role))
@@ -76,7 +78,7 @@ class UserRegistrationApp(customtkinter.CTk):
         conn.commit()
         conn.close()
         messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!")
-
+        self.destroy()
 
     def reg(self):
         self.add_to_database()

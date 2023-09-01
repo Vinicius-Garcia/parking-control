@@ -19,10 +19,10 @@ def validate_length(P):
 
 
 class Exit(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
         self.after(0, lambda: self.state('zoomed'))
-
+        self.user = user
         self.setup_ui()
         self.mainloop()
     def setup_ui(self):
@@ -46,7 +46,6 @@ class Exit(customtkinter.CTk):
         self.button.pack(pady=12, padx=10, side="left")
 
         self.entry1.bind("<Return>", self.enter_pressed)
-        self.after(100, self.set_focus)
 
         self.tree = tk.ttk.Treeview(master=fr,
                                columns=("Placa", "Data de Entrada", "Veiculo"))
@@ -84,6 +83,7 @@ class Exit(customtkinter.CTk):
         placa = selected_entry[0]
         data = selected_entry[1]
         veiculo = selected_entry[2]
+        operador_entrada = selected_entry[3]
         selected_entry = placa
         selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
@@ -144,18 +144,11 @@ class Exit(customtkinter.CTk):
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
         segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
         tempo_segunda_faixa = int(price_row[6]) if price_row else 0
-        print("Valor Segunda " )
-        print(segunda_faixa)
-        print("Tempo Segunda"  )
-        print(tempo_segunda_faixa )
         valor_total = 0.0
         total_minutos = time_difference.total_seconds() / 60
-        print("Total Minutos" )
-        print(total_minutos)
         if total_minutos <= carencia:
             valor_total = 0.0
         else:
-            print(total_minutos)
             if total_minutos <= tempo_primeira_faixa:
                 valor_total = primeira_faixa
             elif total_minutos <= tempo_segunda_faixa:
@@ -164,13 +157,9 @@ class Exit(customtkinter.CTk):
                 valor_total += primeira_faixa + segunda_faixa
 
                 total_minutos = total_minutos - tempo_primeira_faixa - tempo_segunda_faixa
-                print(total_minutos)
                 if total_minutos > 0:
                     total_minutos = total_minutos / tempo_demais_faixas
                     total_minutos_ceiled = math.ceil(total_minutos)
-                    print(total_minutos_ceiled)
-                    print(demais_faixas)
-                    print(valor_total)
                     valor_total += total_minutos_ceiled * demais_faixas
 
         locale.setlocale(locale.LC_MONETARY, 'pt_BR.utf8')
@@ -187,10 +176,10 @@ class Exit(customtkinter.CTk):
         pagamento = combo.get()
         formatted_saida = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
-        def move_to_history(placa, entrada, saida, tempo, pagamento, veiculo):
+        def move_to_history(placa, entrada, saida, tempo, pagamento, veiculo, operador_entrada):
             pagamento = combo.get()
 
-            def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, veiculo):
+            def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, veiculo, operador_entrada):
                 conn = sqlite3.connect('user_data.db')
                 cursor = conn.cursor()
                 cursor.execute("SELECT text, type, ordem FROM texts")
@@ -278,7 +267,9 @@ class Exit(customtkinter.CTk):
                                               tempo_estadia TEXT,
                                               veiculo TEXT,
                                               valor_total REAL,
-                                              pagamento TEXT
+                                              pagamento TEXT,
+                                              operador_entrada TEXT,
+                                              operador_saida TEXT
                                             )''')
 
 
@@ -295,21 +286,20 @@ class Exit(customtkinter.CTk):
                 tempo_demais_faixas = int(price_row[4]) if price_row else 0
                 segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
                 tempo_segunda_faixa = int(price_row[6]) if price_row else 0
-                print(segunda_faixa)
-                print(tempo_segunda_faixa)
                 cursor.close()
                 valor_total = 0.0
                 total_minutos = tempo.total_seconds() / 60
                 if total_minutos <= carencia:
                     valor_total = 0.0
                 else:
-                    print(total_minutos)
                     if total_minutos <= tempo_primeira_faixa:
                         valor_total = primeira_faixa
+                    elif total_minutos <= tempo_segunda_faixa:
+                        valor_total = primeira_faixa + segunda_faixa
                     else:
-                        valor_total += primeira_faixa
+                        valor_total += primeira_faixa + segunda_faixa
 
-                        total_minutos = total_minutos - tempo_primeira_faixa
+                        total_minutos = total_minutos - tempo_primeira_faixa - tempo_segunda_faixa
                         if total_minutos > 0:
                             total_minutos = total_minutos / tempo_demais_faixas
                             total_minutos_ceiled = math.ceil(total_minutos)
@@ -317,13 +307,13 @@ class Exit(customtkinter.CTk):
                 conn = sqlite3.connect('user_data.db')
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo) VALUES (?, ?, ?, ?,?, ?, ?)",
-                    (placa, entrada, saida, tempo_str, valor_total, pagamento, veiculo))
+                    "INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida) VALUES (?, ?, ?, ?,?, ?, ?, ?, ?)",
+                    (placa, entrada, saida, tempo_str, valor_total, pagamento, veiculo, operador_entrada, self.user[2]))
 
                 cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
                 conn.commit()
                 cursor.close()
-                print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, veiculo)
+                print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, veiculo, operador_entrada)
                 self.update_entry_list()
 
             except sqlite3.Error as e:
@@ -331,20 +321,20 @@ class Exit(customtkinter.CTk):
 
         button = customtkinter.CTkButton(details_frame, width=240, height=32, text="DAR SAIDA",
                                          command=lambda: move_to_history(selected_entry, formatted_time,
-                                                                         formatted_saida, time_difference, pagamento, veiculo))
+                                                                         formatted_saida, time_difference, pagamento, veiculo, operador_entrada))
         button.pack(pady=12, padx=10)
 
     def update_entry_list(self):
         try:
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
-            cursor.execute("SELECT placa, data, veiculo FROM entry")
+            cursor.execute("SELECT placa, data, veiculo, operador_entrada FROM entry")
             entries = cursor.fetchall()
             cursor.close()
             self.tree.delete(*self.tree.get_children())
 
             for entry in entries:
-                self.tree.insert('', tk.END, values=(entry[0], entry[1], entry[2]))
+                self.tree.insert('', tk.END, values=(entry[0], entry[1], entry[2], entry[3]))
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
@@ -366,7 +356,6 @@ class Exit(customtkinter.CTk):
         # Calculate the time difference
         current_time = datetime.now()
         time_difference = current_time - selected_time
-        print("Time Difference:", time_difference)
         # Calculate hours, minutes, and seconds
         total_seconds = int(time_difference.total_seconds())
         hours = total_seconds // 3600
@@ -420,8 +409,7 @@ class Exit(customtkinter.CTk):
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
         segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
         tempo_segunda_faixa = int(price_row[6]) if price_row else 0
-        print("SEGUNDA FAIXA:" + segunda_faixa)
-        print("SEGUNDA FAIXA:" + tempo_segunda_faixa)
+
         cursor.close()
 
         valor_total = 0.0
@@ -429,13 +417,14 @@ class Exit(customtkinter.CTk):
         if total_minutos <= carencia:
             valor_total = 0.0
         else:
-            print(total_minutos)
             if total_minutos <= tempo_primeira_faixa:
                 valor_total = primeira_faixa
+            elif total_minutos <= tempo_segunda_faixa:
+                valor_total = primeira_faixa + segunda_faixa
             else:
-                valor_total += primeira_faixa
+                valor_total += primeira_faixa + segunda_faixa
 
-                total_minutos = total_minutos - tempo_primeira_faixa
+                total_minutos = total_minutos - tempo_primeira_faixa - tempo_segunda_faixa
                 if total_minutos > 0:
                     total_minutos = total_minutos / tempo_demais_faixas
                     total_minutos_ceiled = math.ceil(total_minutos)
@@ -455,10 +444,10 @@ class Exit(customtkinter.CTk):
         pagamento = combo.get()
         formatted_saida = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
-        def move_to_history(placa, entrada, saida, tempo, pagamento):
+        def move_to_history(placa, entrada, saida, tempo, pagamento, operador_entrada):
             pagamento = combo.get()
 
-            def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento):
+            def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, operador_entrada):
 
                 conn = sqlite3.connect('user_data.db')
                 cursor = conn.cursor()
@@ -547,6 +536,8 @@ class Exit(customtkinter.CTk):
                                               valor_total REAL,
                                               pagamento TEXT,
                                               veiculo TEXT,
+                                              operador_entrada TEXT,
+                                              operador_saida TEXT
                                             )''')
 
 
@@ -567,13 +558,14 @@ class Exit(customtkinter.CTk):
                 if total_minutos <= carencia:
                     valor_total = 0.0
                 else:
-                    print(total_minutos)
                     if total_minutos <= tempo_primeira_faixa:
                         valor_total = primeira_faixa
+                    elif total_minutos <= tempo_segunda_faixa:
+                        valor_total = primeira_faixa + segunda_faixa
                     else:
-                        valor_total += primeira_faixa
+                        valor_total += primeira_faixa + segunda_faixa
 
-                        total_minutos = total_minutos - tempo_primeira_faixa
+                        total_minutos = total_minutos - tempo_primeira_faixa - tempo_segunda_faixa
                         if total_minutos > 0:
                             total_minutos = total_minutos / tempo_demais_faixas
                             total_minutos_ceiled = math.ceil(total_minutos)
@@ -582,11 +574,11 @@ class Exit(customtkinter.CTk):
                 cursor = conn.cursor()
 
                 cursor.execute(
-                    "INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (placa, entrada, saida, tempo_str, valor_total, pagamento))
+                    "INSERT INTO history (placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (placa, entrada, saida, tempo_str, valor_total, pagamento, operador_entrada, self.user[2]))
 
                 cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
-                cursor.commit()
+                conn.commit()
                 cursor.close()
                 print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento)
                 self.update_entry_list()
@@ -612,7 +604,7 @@ class Exit(customtkinter.CTk):
         print("Plate:", plate)
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT placa, data, veiculo FROM entry WHERE placa=?", (plate,))
+        cursor.execute("SELECT placa, data, veiculo, operador_entrada FROM entry WHERE placa=?", (plate,))
         entry = cursor.fetchone()
         cursor.close()
         print(entry)
