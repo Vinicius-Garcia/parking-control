@@ -90,7 +90,7 @@ class Exit(customtkinter.CTk):
         # Calculate the time difference
         current_time = datetime.now()
         time_difference = current_time - selected_time
-        print("Time Difference:", time_difference)
+        print("Time Difference1:", time_difference)
         # Calculate hours, minutes, and seconds
         total_seconds = int(time_difference.total_seconds())
         hours = total_seconds // 3600
@@ -128,7 +128,7 @@ class Exit(customtkinter.CTk):
             conn = sqlite3.connect('../user_data.db')
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
+                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min,segunda_faixa, segunda_faixa_min FROM price LIMIT 1")
             price_row = cursor.fetchone()
             cursor.close()
         except sqlite3.Error as e:
@@ -142,9 +142,15 @@ class Exit(customtkinter.CTk):
         demais_faixas = int(price_row[2]) if price_row else 0
         tempo_primeira_faixa = int(price_row[3]) if price_row else 0
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
-
+        segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
+        tempo_segunda_faixa = int(price_row[6]) if price_row else 0
+        print("Valor Segunda " )
+        print(segunda_faixa)
+        print("Tempo Segunda"  )
+        print(tempo_segunda_faixa )
         valor_total = 0.0
         total_minutos = time_difference.total_seconds() / 60
+        print("Total Minutos" )
         print(total_minutos)
         if total_minutos <= carencia:
             valor_total = 0.0
@@ -152,13 +158,19 @@ class Exit(customtkinter.CTk):
             print(total_minutos)
             if total_minutos <= tempo_primeira_faixa:
                 valor_total = primeira_faixa
+            elif total_minutos <= tempo_segunda_faixa:
+                valor_total = primeira_faixa + segunda_faixa
             else:
-                valor_total += primeira_faixa
+                valor_total += primeira_faixa + segunda_faixa
 
-                total_minutos = total_minutos - tempo_primeira_faixa
+                total_minutos = total_minutos - tempo_primeira_faixa - tempo_segunda_faixa
+                print(total_minutos)
                 if total_minutos > 0:
                     total_minutos = total_minutos / tempo_demais_faixas
                     total_minutos_ceiled = math.ceil(total_minutos)
+                    print(total_minutos_ceiled)
+                    print(demais_faixas)
+                    print(valor_total)
                     valor_total += total_minutos_ceiled * demais_faixas
 
         locale.setlocale(locale.LC_MONETARY, 'pt_BR.utf8')
@@ -273,7 +285,7 @@ class Exit(customtkinter.CTk):
                 tempo_str = str(tempo)
 
                 cursor.execute(
-                    "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
+                    "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min,segunda_faixa, segunda_faixa_min FROM price LIMIT 1")
                 price_row = cursor.fetchone()
 
                 carencia = int(price_row[0]) if price_row else 0
@@ -281,6 +293,10 @@ class Exit(customtkinter.CTk):
                 demais_faixas = int(price_row[2]) if price_row else 0
                 tempo_primeira_faixa = int(price_row[3]) if price_row else 0
                 tempo_demais_faixas = int(price_row[4]) if price_row else 0
+                segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
+                tempo_segunda_faixa = int(price_row[6]) if price_row else 0
+                print(segunda_faixa)
+                print(tempo_segunda_faixa)
                 cursor.close()
                 valor_total = 0.0
                 total_minutos = tempo.total_seconds() / 60
@@ -388,7 +404,7 @@ class Exit(customtkinter.CTk):
             conn = sqlite3.connect('../user_data.db')
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min FROM price LIMIT 1")
+                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min,segunda_faixa, segunda_faixa_min FROM price LIMIT 1")
             price_row = cursor.fetchone()
             cursor.close()
         except sqlite3.Error as e:
@@ -402,10 +418,14 @@ class Exit(customtkinter.CTk):
         demais_faixas = int(price_row[2]) if price_row else 0
         tempo_primeira_faixa = int(price_row[3]) if price_row else 0
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
+        segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
+        tempo_segunda_faixa = int(price_row[6]) if price_row else 0
+        print("SEGUNDA FAIXA:" + segunda_faixa)
+        print("SEGUNDA FAIXA:" + tempo_segunda_faixa)
+        cursor.close()
 
         valor_total = 0.0
         total_minutos = time_difference.total_seconds() / 60
-        print(total_minutos)
         if total_minutos <= carencia:
             valor_total = 0.0
         else:

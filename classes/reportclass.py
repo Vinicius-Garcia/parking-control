@@ -213,7 +213,7 @@ class Report(customtkinter.CTk):
                 total_pix += valor_total
             elif pagamento == "DINHEIRO":
                 total_cash += valor_total
-            elif pagamento == "CARTAO":
+            elif pagamento == "CARTÃO":
                 total_card += valor_total
         self.total_pix_label.configure(text=f"Pix: R${total_pix:.2f}")
         self.total_cash_label.configure(text=f"Dinheiro: R${total_cash:.2f}")
