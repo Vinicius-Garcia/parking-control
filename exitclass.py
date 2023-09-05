@@ -10,7 +10,6 @@ import win32ui
 import win32con as wcon
 
 
-
 def validate_length(P):
     if len(P) <= 7:
         return True
@@ -29,7 +28,7 @@ class Exit(customtkinter.CTk):
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-        self.label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="DAR SAIDA", font=("Roboto", 24))
+        self.label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="REGISTRAR SAIDA", font=("Roboto", 24))
         self.label.pack(pady=12, padx=10)
 
         self.search = customtkinter.CTkFrame(master=fr)
@@ -42,7 +41,11 @@ class Exit(customtkinter.CTk):
                                         validatecommand=(self.register(validate_length), '%P'))
         self.entry1.pack(pady=12, padx=(0,10), side="left")
 
-        self.button = customtkinter.CTkButton(self.search, width=240, height=32, text="DAR SAIDA", command=self.dar_saida)
+        print("master")
+        print(self.master)
+        self.after(200, lambda: self.entry1.focus())
+
+        self.button = customtkinter.CTkButton(self.search, width=240, height=32, text="REGISTRAR SAIDA", command=self.dar_saida)
         self.button.pack(pady=12, padx=10, side="left")
 
         self.entry1.bind("<Return>", self.enter_pressed)
@@ -69,10 +72,13 @@ class Exit(customtkinter.CTk):
 
         self.update_entry_list()
 
+
         self.tree.bind("<Double-1>", self.open_entry_details)
 
 
     def open_entry_details(self,selected_item):
+
+
         selected_item = self.tree.selection()[0]
         selected_entry = self.tree.item(selected_item, "values")
         details_window = tk.Toplevel(self)
@@ -172,6 +178,8 @@ class Exit(customtkinter.CTk):
 
         combo = customtkinter.CTkComboBox(details_frame, width=400, height=40, values=["PIX", "CARTÃO", "DINHEIRO"])
         combo.pack(pady=12, padx=10)
+
+        self.after(200, lambda: combo.focus())
 
         pagamento = combo.get()
         formatted_saida = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
@@ -323,6 +331,8 @@ class Exit(customtkinter.CTk):
                                          command=lambda: move_to_history(selected_entry, formatted_time,
                                                                          formatted_saida, time_difference, pagamento, veiculo, operador_entrada))
         button.pack(pady=12, padx=10)
+
+        self.entry1.focus_set()
 
     def update_entry_list(self):
         try:
@@ -479,16 +489,17 @@ class Exit(customtkinter.CTk):
 
                 pdc.TextOut(((width - pdc.GetTextExtent("RECIBO")[0]) // 2), y_position, "RECIBO")
 
-                for text in padrão_superior_texts:
-                    text_content, _, ordem = text
-                    x_position = 0  # Starting x-position for the text
-                    y_position += 40  # Calculate y-position based on ordem value
+                if padrão_superior_texts:
+                    for text in padrão_superior_texts:
+                        text_content, _, ordem = text
+                        x_position = 0  # Starting x-position for the text
+                        y_position += 40  # Calculate y-position based on ordem value
 
-                    print(y_position)
-                    print(text_content)
+                        print(y_position)
+                        print(text_content)
 
-                    # Draw the text
-                    pdc.TextOut(x_position, y_position, text_content)
+                        # Draw the text
+                        pdc.TextOut(x_position, y_position, text_content)
 
                 y_position += 100  # Adjust y-position after PADRÃO SUPERIOR text
 
@@ -507,15 +518,16 @@ class Exit(customtkinter.CTk):
                 pdc.TextOut(0, y_position, "PAGAMENTO: ")
                 pdc.TextOut((width - pdc.GetTextExtent(pagamento)[0]), y_position, pagamento)
                 y_position += 20
-                for text in recibo_inferior:
-                    text_content, _, ordem = text
-                    l = width // 2
-                    x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
+                if recibo_inferior:
+                    for text in recibo_inferior:
+                        text_content, _, ordem = text
+                        l = width // 2
+                        x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
 
-                    y_position += 40  # Calculate y-position based on ordem value
+                        y_position += 40  # Calculate y-position based on ordem value
 
-                    # Draw the text
-                    pdc.TextOut(x_position, y_position, text_content)
+                        # Draw the text
+                        pdc.TextOut(x_position, y_position, text_content)
 
                 pdc.EndPage()
                 pdc.EndDoc()
@@ -614,14 +626,13 @@ class Exit(customtkinter.CTk):
         else:
             messagebox.showinfo("Placa não encontrada", f"A placa {plate} não foi encontrada no banco de dados.")
 
+
     def enter_pressed(self,event):
         self.dar_saida()
-
-    def set_focus(self):
         self.entry1.focus_set()
-        self.after(100, self.set_focus)
 
     def run(self):
+        self.set_focus()
         self.mainloop()
 
 if __name__ == "__main__":

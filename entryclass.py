@@ -32,7 +32,7 @@ class Entry(customtkinter.CTk):
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-        self.label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="DAR ENTRADA", font=("Roboto", 24))
+        self.label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="REGISTRAR ENTRADA", font=("Roboto", 24))
         self.label.pack(pady=12, padx=10)
 
         self.search = customtkinter.CTkFrame(master=fr)
@@ -46,12 +46,13 @@ class Entry(customtkinter.CTk):
                                              validatecommand=(self.register(validate_length), '%P'))
         self.entry1.pack(pady=12, padx=10, side="left")
         self.entry1.bind("<Return>", self.enter_pressed)
-        self.after(100, self.set_focus)
+        self.after(200, lambda: self.entry1.focus())
+
         self.vehicle_checkbox = customtkinter.CTkCheckBox(self.search, text="MOTO", variable=self.vehicle_type,
                                                           onvalue="MOTO", offvalue="CARRO")
         self.vehicle_checkbox.pack(pady=12, padx=10, side="left")
 
-        self.button = customtkinter.CTkButton(self.search, width=240, height=32, text="DAR ENTRADA",
+        self.button = customtkinter.CTkButton(self.search, width=240, height=32, text="REGISTRAR ENTRADA",
                                               command=self.send_entry)
         self.button.pack(pady=12, padx=10, side="left")
 
@@ -117,23 +118,22 @@ class Entry(customtkinter.CTk):
 
             self.update_entry_list()  # Update the UI
             cursor.close()
+            messagebox.showinfo("Registro de Entrada", "Entrada registrada com sucesso.")
+
         except sqlite3.Error as e:
             print("SQLite error:", e)
-
+            messagebox.showerror("Erro de Registro", "Ocorreu um erro ao registrar a entrada.")
 
         # Function to open a new window and display selected entry details
     def open_entry_details(self,event):
-            if self.details_window_open:
-                return
-            if self.details_window is not None:
-                self.details_window.destroy()
-
             selected_item = self.tree.selection()[0]  # Get the selected item's ID
             selected_entry = self.tree.item(selected_item, "values")
             details_window = tk.Toplevel(self)
             details_window.title("Entry Details")
             details_window.geometry("400x250")
             details_window.configure(bg="#212121")
+
+            self.after(200, lambda: details_window.focus())
 
             placa = selected_entry[0]
             data = selected_entry[1]
@@ -166,7 +166,6 @@ class Entry(customtkinter.CTk):
                                              command=lambda: self.print_entry(selected_entry, formatted_time))
             self.button.pack(pady=12, padx=10)
 
-            details_window.protocol("WM_DELETE_WINDOW", self.on_details_window_close)
 
 
     def draw_img(self,hdc, dib, maxh, maxw, y_position):
@@ -217,17 +216,17 @@ class Entry(customtkinter.CTk):
             })
 
             pdc.SelectObject(font)
+            if padrão_superior_texts:
+                for text in padrão_superior_texts:
+                    text_content, _, ordem = text
+                    x_position = 0  # Starting x-position for the text
+                    y_position += 40  # Calculate y-position based on ordem value
 
-            for text in padrão_superior_texts:
-                text_content, _, ordem = text
-                x_position = 0  # Starting x-position for the text
-                y_position += 40  # Calculate y-position based on ordem value
+                    print(y_position)
+                    print(text_content)
 
-                print(y_position)
-                print(text_content)
-
-                # Draw the text
-                pdc.TextOut(x_position, y_position, text_content)
+                    # Draw the text
+                    pdc.TextOut(x_position, y_position, text_content)
 
             y_position += 50  # Adjust y-position after PADRÃO SUPERIOR text
 
@@ -257,15 +256,16 @@ class Entry(customtkinter.CTk):
             pdc.TextOut(0, y_position, "DATA/HORA: ")
             pdc.TextOut((width - pdc.GetTextExtent(data)[0]), y_position, data)
             y_position += 20
-            for text in padrão_inferior_texts:
-                text_content, _, ordem = text
-                l = width // 2
-                x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
+            if padrão_inferior_texts:
+                for text in padrão_inferior_texts:
+                    text_content, _, ordem = text
+                    l = width // 2
+                    x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
 
-                y_position += 40  # Calculate y-position based on ordem value
+                    y_position += 40  # Calculate y-position based on ordem value
 
-                # Draw the text
-                pdc.TextOut(x_position, y_position, text_content)
+                    # Draw the text
+                    pdc.TextOut(x_position, y_position, text_content)
 
             pdc.EndPage()
             pdc.EndDoc()
