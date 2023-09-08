@@ -239,8 +239,8 @@ class Report(customtkinter.CTk):
     def send_email(self):
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
-        smtp_username = 'viniciusgarcia130@gmail.com'
-        smtp_password = '@Qwertyuiop0'
+        smtp_username = 'relatoriostatus@gmail.com'
+        smtp_password = '@Perto22'
 
         to_email = 'viniciusgarcia1300@gmail.com'
 

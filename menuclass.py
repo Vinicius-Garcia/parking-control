@@ -70,4 +70,3 @@ class Menu(customtkinter.CTk):
 
 if __name__ == "__main__":
     app = Menu()
-    app.run()

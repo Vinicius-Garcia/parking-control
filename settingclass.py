@@ -2,9 +2,11 @@ import customtkinter
 import tkinter as tk
 from tkinter import messagebox
 import sqlite3
+from prices import Prices
 
 conn = sqlite3.connect('user_data.db')
 cursor = conn.cursor()
+
 
 class Settings(customtkinter.CTk):
     def __init__(self):
@@ -12,6 +14,7 @@ class Settings(customtkinter.CTk):
         self.after(0, lambda: self.state('zoomed'))
 
         self.setup_ui()
+        self.mainloop()
 
     def setup_ui(self):
 
@@ -217,150 +220,7 @@ class Settings(customtkinter.CTk):
             tree.bind("<Double-1>", open_users_details)
 
     def price(self):
-            def insert_price():
-                try:
-                    carencia_val = carencia_entry.get()
-                    primeira_faixa_val = primeira_faixa_entry.get()
-                    segunda_faixa_val = primeira_faixa_entry.get()
-                    demais_faixas_val = demais_faixas_entry.get()
-                    primeira_faixa_min_val = primeira_faixa_min_entry.get()
-                    segunda_faixa_min_val = primeira_faixa_min_entry.get()
-                    demais_faixas_min_val = demais_faixas_min_entry.get()
-                    print(carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,
-                          demais_faixas_val, segunda_faixa_val, segunda_faixa_min_val)
-
-                    conn = sqlite3.connect('user_data.db')
-                    cursor = conn.cursor()
-
-                    cursor.execute('''CREATE TABLE IF NOT EXISTS price (
-                                           id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                           carencia TEXT,
-                                           primeira_faixa TEXT,
-                                           primeira_faixa_min TEXT,
-                                           segunda_faixa TEXT,
-                                           segunda_faixa_min TEXT,
-                                           demais_faixas TEXT,
-                                           demais_faixas_min TEXT
-                                       )''')
-
-                    cursor.execute("SELECT * FROM price LIMIT 1")
-                    row = cursor.fetchone()
-
-                    if row:
-                        cursor.execute(
-                            "UPDATE price SET carencia=?, primeira_faixa=?, primeira_faixa_min=?,demais_faixas_min=?, demais_faixas=?,segunda_faixa=?, segunda_faixa_min=?  WHERE id=?",
-                            (carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,
-                             demais_faixas_val,segunda_faixa_val, segunda_faixa_min_val,
-                             row[0]))
-                        conn.commit()
-                        cursor.close()
-                        messagebox.showinfo(
-                            "Sucesso", "Valores da tabela de preço atualizados com sucesso!")
-                        price_window.destroy()
-                    else:
-                        cursor.execute(
-                            "INSERT INTO price (carencia, primeira_faixa,primeira_faixa_min,demais_faixas_min,  demais_faixas, segunda_faixa=?, segunda_faixa_min=?,) VALUES (?,?,?, ?, ?, ? , ?)",
-                            (
-                                carencia_val, primeira_faixa_val, primeira_faixa_min_val, demais_faixas_min_val,
-                                demais_faixas_val,segunda_faixa_val, segunda_faixa_min_val,))
-                        conn.commit()
-                        cursor.close()
-                        messagebox.showinfo(
-                            "Sucesso", "Valores inseridos na tabela de preço com sucesso!")
-                        price_window.destroy()
-
-
-                except sqlite3.Error as e:
-                    print("aqui")
-                    print("SQLite error:", e)
-
-            def populate_entries():
-                try:
-                    conn = sqlite3.connect('user_data.db')
-                    cursor = conn.cursor()
-
-                    cursor.execute("SELECT * FROM price LIMIT 1")
-                    row = cursor.fetchone()
-                    cursor.close()
-
-                    if row:
-                        carencia_entry.insert(0, row[1])
-                        primeira_faixa_entry.insert(0, row[2])
-                        primeira_faixa_min_entry.insert(0, row[3])
-                        demais_faixas_entry.insert(0, row[4])
-                        demais_faixas_min_entry.insert(0, row[5])
-                        segunda_faixa_entry.insert(0, row[6])
-                        segunda_faixa_min_entry.insert(0, row[7])
-
-
-
-                except sqlite3.Error as e:
-                    cursor.close()
-                    print("SQLite error:", e)
-
-            price_window = tk.Toplevel(self)
-            price_window.title("Tabela de Preço")
-            price_window.geometry("400x650")
-            price_window.configure(bg="#212121")
-
-            label = customtkinter.CTkLabel(price_window, width=300, height=40, font=("Roboto", 36),
-                                           text="Tabela de Preços")
-            label.pack(pady=12, padx=10)
-
-            carencia_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Carência:")
-            carencia_label.pack(pady=6, padx=10)
-
-            carencia_entry = customtkinter.CTkEntry(price_window, width=240)
-            carencia_entry.pack(pady=6, padx=10)
-
-            primeira_faixa_min_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Tempo da Primeira Faixa(em minutos):")
-            primeira_faixa_min_label.pack(pady=6, padx=10)
-
-            primeira_faixa_min_entry = customtkinter.CTkEntry(price_window, width=240)
-            primeira_faixa_min_entry.pack(pady=6, padx=10)
-
-            primeira_faixa_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Valor da Primeira Faixa:")
-            primeira_faixa_label.pack(pady=6, padx=10)
-
-            primeira_faixa_entry = customtkinter.CTkEntry(price_window, width=240)
-            primeira_faixa_entry.pack(pady=6, padx=10)
-            segunda_faixa_min_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Tempo da Segunda Faixa(em minutos):")
-            segunda_faixa_min_label.pack(pady=6, padx=10)
-
-            segunda_faixa_min_entry = customtkinter.CTkEntry(price_window, width=240)
-            segunda_faixa_min_entry.pack(pady=6, padx=10)
-
-            segunda_faixa_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Valor da Segunda Faixa:")
-            segunda_faixa_label.pack(pady=6, padx=10)
-
-            segunda_faixa_entry = customtkinter.CTkEntry(price_window, width=240)
-            segunda_faixa_entry.pack(pady=6, padx=10)
-
-            demais_faixas_min_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Tempo das Demais Faixa(em minutos):")
-            demais_faixas_min_label.pack(pady=6, padx=10)
-
-            demais_faixas_min_entry = customtkinter.CTkEntry(price_window, width=240)
-            demais_faixas_min_entry.pack(pady=6, padx=10)
-
-            demais_faixas_label = customtkinter.CTkLabel(
-                price_window, width=240, height=1, text="Valor das Demais Faixas:")
-            demais_faixas_label.pack(pady=6, padx=10)
-
-            demais_faixas_entry = customtkinter.CTkEntry(price_window, width=240)
-            demais_faixas_entry.pack(pady=6, padx=10)
-
-            insert_button = customtkinter.CTkButton(
-                price_window, width=240, height=32, text="Inserir", command=insert_price)
-            insert_button.pack(pady=12, padx=10)
-
-            populate_entries()
-
+        Prices()
     def texts(self):
             def add_user():
                 adddetails_window = tk.Toplevel(self)
@@ -526,9 +386,7 @@ class Settings(customtkinter.CTk):
 
             tree.bind("<Double-1>", open_texts_details)
 
-    def run(self):
-        self.mainloop()
+
 
 if __name__ == "__main__":
     app = Settings()
-    app.run()

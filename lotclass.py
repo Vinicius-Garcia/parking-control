@@ -35,6 +35,18 @@ class Lot(customtkinter.CTk):
         label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="PÁTIO ATUAL", font=("Roboto", 24))
         label.pack(pady=12, padx=10)
 
+        self.generate = customtkinter.CTkFrame(master=fr)
+        self.generate.pack(pady=10, padx=10, fill="both")
+
+
+        self.generate1 = customtkinter.CTkFrame(self.generate)
+        self.generate1.pack(pady=10, padx=10, anchor="e", side="right")
+
+        self.button = customtkinter.CTkButton(self.generate1, width=120, height=24, text="IMPRIMIR",
+                                              command=self.imprimir)
+        self.button.pack(padx=10, pady=10, side="left")
+
+
         self.tree = tk.ttk.Treeview(master=fr,
                                columns=("Placa", "Data de Entrada", "Veiculo"))
         self.tree['show'] = 'headings'
@@ -57,7 +69,71 @@ class Lot(customtkinter.CTk):
 
         self.tree.bind("<Double-1>", self.open_entry_details)
 
+    def imprimir(self):
+        try:
+            conn = sqlite3.connect('user_data.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT placa, data, veiculo FROM entry")
+            entries = cursor.fetchall()
+            printer_name = win32print.GetDefaultPrinter()
+            hprinter = win32print.OpenPrinter(printer_name)
 
+            printer_info = win32print.GetPrinter(hprinter, 2)
+            pdc = win32ui.CreateDC()
+            pdc.CreatePrinterDC(printer_name)
+            pdc.StartDoc('Ticket')
+            pdc.StartPage()
+
+            y_position = 0
+            font = win32ui.CreateFont({
+                    "name": "Arial",  # Altere para a fonte desejada
+                    "height": 30,  # Altere para o tamanho de fonte desejado
+            })
+            pdc.SelectObject(font)
+            width = pdc.GetDeviceCaps(wcon.HORZRES)
+            text_width = pdc.GetTextExtent("OCUPAÇÃO")[0]
+
+            x_position = (width - text_width) // 2
+
+            y_position += 50  # Ajuste a posição vertical conforme necessário
+            pdc.TextOut(x_position, y_position, 'OCUPAÇÃO')
+
+            y_position += 50
+            total_carros = 0
+            total_motos = 0
+            for entry in entries:
+                    placa = entry[0]
+                    data = entry[1]
+                    veiculo = entry[2]
+                    text_width = pdc.GetTextExtent(veiculo)[0]
+
+                    x_position = (width - text_width) // 2
+                    pdc.TextOut(0, y_position, placa)
+                    pdc.TextOut(x_position, y_position, veiculo)
+                    pdc.TextOut((width - pdc.GetTextExtent(data)[0]), y_position, data)
+                    y_position += 50
+                    if veiculo.lower() == "carro":
+                        total_carros += 1
+                    elif veiculo.lower() == "moto":
+                        total_motos += 1
+
+            total_geral = len(entries)
+            y_position += 50
+            pdc.TextOut(0, y_position, f"Total Carros: {total_carros}")
+            y_position += 30
+            pdc.TextOut(0, y_position, f"Total Motos: {total_motos}")
+            y_position += 30
+            pdc.TextOut(0, y_position, f"Total Geral: {total_geral}")
+
+            pdc.EndPage()
+            pdc.EndDoc()
+            pdc.DeleteDC()
+            win32print.ClosePrinter(hprinter)
+
+            cursor.close()
+
+        except sqlite3.Error as e:
+            print("SQLite error:", e)
 
     def open_entry_details(self,event):
         selected_item = self.tree.selection()[0]  # Get the selected item's ID
