@@ -80,6 +80,8 @@ class Entry(customtkinter.CTk):
         self.update_entry_list()
 
         self.tree.bind("<Double-1>", self.open_entry_details)
+
+
     def plate_exists(self,placa):
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
@@ -97,6 +99,8 @@ class Entry(customtkinter.CTk):
     def send_entry(self):
         placa = self.entry1.get()
         veiculo = self.vehicle_type.get()
+
+        self.entry1.delete(0,tk.END )
 
         try:
             conn = sqlite3.connect('user_data.db')
@@ -118,26 +122,30 @@ class Entry(customtkinter.CTk):
 
             self.update_entry_list()  # Update the UI
             cursor.close()
-            messagebox.showinfo("Registro de Entrada", "Entrada registrada com sucesso.")
+            self.open_entry_details('',placa, data_atual, veiculo,)
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
             messagebox.showerror("Erro de Registro", "Ocorreu um erro ao registrar a entrada.")
 
         # Function to open a new window and display selected entry details
-    def open_entry_details(self,event):
-            selected_item = self.tree.selection()[0]  # Get the selected item's ID
-            selected_entry = self.tree.item(selected_item, "values")
+    def open_entry_details(self,event, plate, date, veiculo):
             details_window = tk.Toplevel(self)
             details_window.title("Entry Details")
             details_window.geometry("400x250")
             details_window.configure(bg="#212121")
 
             self.after(200, lambda: details_window.focus())
-
-            placa = selected_entry[0]
-            data = selected_entry[1]
-            veiculo = selected_entry[2]
+            if plate and date and veiculo:
+                placa = plate
+                data = date
+                veiculo = veiculo
+            else:
+                selected_item = self.tree.selection()[0]  # Get the selected item's ID
+                selected_entry = self.tree.item(selected_item, "values")
+                placa = selected_entry[0]
+                data = selected_entry[1]
+                veiculo = selected_entry[2]
 
             selected_entry = placa
             selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
@@ -291,7 +299,7 @@ class Entry(customtkinter.CTk):
                 print("SQLite error:", e)
 
     def enter_pressed(self,event):
-        self.dar_saida()
+        self.send_entry()
 
     def set_focus(self):
         self.entry1.focus_set()
