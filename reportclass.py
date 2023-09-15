@@ -83,7 +83,7 @@ class Report(customtkinter.CTk):
         self.tree = tk.ttk.Treeview(master=fr,
                                columns=(
                                "Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago",
-                               "Pagamento","Veiculo" ,"Operador Entrada", "Operador Saída"))
+                               "Pagamento","Veículo" ,"Operador Entrada", "Operador Saída"))
         self.tree['show'] = 'headings'
         self.tree.heading("#1", text="Placa")
         self.tree.heading("#2", text="Data de Entrada")
@@ -91,7 +91,7 @@ class Report(customtkinter.CTk):
         self.tree.heading("#4", text="Tempo de Permanência")
         self.tree.heading("#5", text="Valor Pago")
         self.tree.heading("#6", text="Pagamento")
-        self.tree.heading("#7", text="Veiculo")
+        self.tree.heading("#7", text="Veículo")
         self.tree.heading("#8", text="Operador Entrada")
         self.tree.heading("#9", text="Operador Saída")
 

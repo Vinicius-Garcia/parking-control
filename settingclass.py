@@ -121,7 +121,7 @@ class Settings(customtkinter.CTk):
                 selected_entry = tree.item(selected_item, "values")
                 details_window = tk.Toplevel(self)
                 details_window.title("Users Detail")
-                details_window.geometry("400x450")
+                details_window.geometry("400x520")
                 details_window.configure(bg="#212121")
                 print(selected_item)
                 # Get the selected entry details
@@ -154,6 +154,19 @@ class Settings(customtkinter.CTk):
                     except sqlite3.Error as e:
                         print("SQLite error:", e)
 
+                def remove_user():
+                    selected_item = tree.selection()[0]
+                    if selected_item:
+                        confirmation = messagebox.askyesno("Confirmar Remoção",
+                                                           "Tem certeza de que deseja remover este usuário?")
+                        if confirmation:
+                            selected_entry = tree.item(selected_item, "values")
+                            selected_id = selected_entry[4]
+                            cursor.execute("DELETE FROM users WHERE id=?", (selected_id,))
+                            conn.commit()
+                            update_user_list()
+                            details_window.destroy()
+
                 label = customtkinter.CTkLabel(details_window, width=300, height=40, font=("Roboto", 36),
                                                text="Alterar Usuário")
                 label.pack(pady=12, padx=10)
@@ -176,8 +189,11 @@ class Settings(customtkinter.CTk):
                                                  command=update_user)
                 button.pack(pady=12, padx=24)
 
+                button_remove_user = customtkinter.CTkButton(
+                    details_window, width=300, height=40, text="REMOVER USUÁRIO",fg_color='#91403d', command=remove_user)
+                button_remove_user.pack(pady=12, padx=10)
                 button1 = customtkinter.CTkButton(details_window, width=300, height=40, text="CANCELAR",
-                                                  fg_color='#91403d',
+                                                  fg_color='#a2a2a2',
                                                   command=cancel)
                 button1.pack(pady=12, padx=10)
 
@@ -299,7 +315,7 @@ class Settings(customtkinter.CTk):
                 selected_entry = tree.item(selected_item, "values")
                 details_window = tk.Toplevel(self)
                 details_window.title("Texts Detail")
-                details_window.geometry("400x450")
+                details_window.geometry("400x520")
                 details_window.configure(bg="#212121")
                 print(selected_item)
                 # Get the selected entry details
@@ -326,6 +342,18 @@ class Settings(customtkinter.CTk):
                     except sqlite3.Error as e:
                         print("SQLite error:", e)
 
+                def remove_text():
+                    selected_item = tree.selection()[0]
+                    if selected_item:
+                        confirmation = messagebox.askyesno("Confirmar Remoção",
+                                                           "Tem certeza de que deseja remover esta frase?")
+                        if confirmation:
+                            selected_entry = tree.item(selected_item, "values")
+                            selected_id = selected_entry[3]
+                            cursor.execute("DELETE FROM texts WHERE id=?", (selected_id,))
+                            conn.commit()
+                            update_user_list()
+                            details_window.destroy()
                 label = customtkinter.CTkLabel(details_window, width=300, height=40, font=("Roboto", 36),
                                                text="Alterar Frase")
                 label.pack(pady=12, padx=10)
@@ -344,9 +372,15 @@ class Settings(customtkinter.CTk):
                                                  command=update_user)
                 button.pack(pady=12, padx=24)
 
+                button_remove_text = customtkinter.CTkButton(
+                    details_window, width=300, height=40, text="REMOVER FRASE", fg_color='#91403d' ,command=remove_text)
+                button_remove_text.pack(pady=12, padx=10)
+
                 button1 = customtkinter.CTkButton(details_window, width=300, height=40, text="CANCELAR",
-                                                  fg_color='#91403d',
+                                                  fg_color='#a2a2a2',
                                                   command=cancel)
+
+
                 button1.pack(pady=12, padx=10)
 
                 text.insert(0, selected_text)

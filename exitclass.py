@@ -51,13 +51,13 @@ class Exit(customtkinter.CTk):
         self.entry1.bind("<Return>", self.enter_pressed)
 
         self.tree = tk.ttk.Treeview(master=fr,
-                               columns=("Placa", "Data de Entrada", "Veiculo"))
+                               columns=("Placa", "Data de Entrada", "Veículo"))
         self.tree.pack(side='left')
 
         self.tree['show'] = 'headings'
         self.tree.heading("#1", text="Placa")
         self.tree.heading("#2", text="Data de Entrada")
-        self.tree.heading("#3", text="Veiculo")
+        self.tree.heading("#3", text="Veículo")
 
         self.tree.column("#1", width=100)
         self.tree.column("#2", width=150)
@@ -122,7 +122,7 @@ class Exit(customtkinter.CTk):
             details_frame, width=120, height=1, text=f"Data: {formatted_time}", font=("Roboto", 16), anchor='w')
         details_label.pack(pady=6, padx=10, anchor="w")
         details_label = customtkinter.CTkLabel(
-            details_frame, width=120, height=1, text=f"Veiculo: {veiculo}", font=("Roboto", 16), anchor='w')
+            details_frame, width=120, height=1, text=f"Veículo: {veiculo}", font=("Roboto", 16), anchor='w')
         details_label.pack(pady=6, padx=10, anchor="w")
 
         details_label = customtkinter.CTkLabel(

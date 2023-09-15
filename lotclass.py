@@ -48,11 +48,11 @@ class Lot(customtkinter.CTk):
 
 
         self.tree = tk.ttk.Treeview(master=fr,
-                               columns=("Placa", "Data de Entrada", "Veiculo"))
+                               columns=("Placa", "Data de Entrada", "Veículo"))
         self.tree['show'] = 'headings'
         self.tree.heading("#1", text="Placa")
         self.tree.heading("#2", text="Data de Entrada")
-        self.tree.heading("#3", text="Veiculo")
+        self.tree.heading("#3", text="Veículo")
 
         self.tree.column("#1", width=100)
         self.tree.column("#2", width=150)
