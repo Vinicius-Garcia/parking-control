@@ -40,9 +40,6 @@ class Exit(customtkinter.CTk):
         self.entry1 = customtkinter.CTkEntry(self.search, width=240, height=32, placeholder_text="PLACA", validate="key",
                                         validatecommand=(self.register(validate_length), '%P'))
         self.entry1.pack(pady=12, padx=(0,10), side="left")
-
-        print("master")
-        print(self.master)
         self.after(200, lambda: self.entry1.focus())
 
         self.button = customtkinter.CTkButton(self.search, width=240, height=32, text="REGISTRAR SAIDA", command=self.dar_saida)
@@ -93,17 +90,13 @@ class Exit(customtkinter.CTk):
         selected_entry = placa
         selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
 
-        # Calculate the time difference
         current_time = datetime.now()
         time_difference = current_time - selected_time
-        print("Time Difference1:", time_difference)
-        # Calculate hours, minutes, and seconds
         total_seconds = int(time_difference.total_seconds())
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
         seconds = total_seconds % 60
 
-        # Format the selected time in Brazilian Portuguese (pt-br) format
         locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
         formatted_time = selected_time.strftime('%d/%m/%Y %H:%M:%S')
 
@@ -219,29 +212,24 @@ class Exit(customtkinter.CTk):
 
                 for text in padrão_superior_texts:
                     text_content, _, ordem = text
-                    x_position = 0  # Starting x-position for the text
-                    y_position += 40  # Calculate y-position based on ordem value
-
-                    print(y_position)
-                    print(text_content)
-
-                    # Draw the text
+                    x_position = 0
+                    y_position += 40
                     pdc.TextOut(x_position, y_position, text_content)
 
-                y_position += 100  # Adjust y-position after PADRÃO SUPERIOR text
+                y_position += 100
 
                 pdc.TextOut(0, y_position, "PLACA: ")
                 pdc.TextOut((width - pdc.GetTextExtent(placa)[0]), y_position, placa)
-                y_position += 50  # Adjust y-position after PLACA text
+                y_position += 50
                 pdc.TextOut(0, y_position, "DATA DE ENTRADA: ")
                 pdc.TextOut((width - pdc.GetTextExtent(entrada)[0]), y_position, entrada)
-                y_position += 50  # Adjust y-position after PLACA text
+                y_position += 50
                 pdc.TextOut(0, y_position, "SAIDA: ")
                 pdc.TextOut((width - pdc.GetTextExtent(saida)[0]), y_position, saida)
-                y_position += 50  # Adjust y-position after PLACA text
+                y_position += 50
                 pdc.TextOut(0, y_position, "VALOR TOTAL: ")
                 pdc.TextOut((width - pdc.GetTextExtent(str(valor_total))[0]), y_position, str(valor_total))
-                y_position += 50  # Adjust y-position after PLACA text
+                y_position += 50
                 pdc.TextOut(0, y_position, "PAGAMENTO: ")
                 pdc.TextOut((width - pdc.GetTextExtent(pagamento)[0]), y_position, pagamento)
                 y_position += 50
@@ -253,9 +241,7 @@ class Exit(customtkinter.CTk):
                     l = width // 2
                     x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
 
-                    y_position += 40  # Calculate y-position based on ordem value
-
-                    # Draw the text
+                    y_position += 40
                     pdc.TextOut(x_position, y_position, text_content)
 
                 pdc.EndPage()
@@ -270,8 +256,8 @@ class Exit(customtkinter.CTk):
                 cursor.execute('''CREATE TABLE IF NOT EXISTS history (
                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
                                               placa TEXT,
-                                              data_entrada TEXT,
-                                              data_saida TEXT,
+                                              data_entrada DATE,
+                                              data_saida DATE,
                                               tempo_estadia TEXT,
                                               veiculo TEXT,
                                               valor_total REAL,
@@ -350,8 +336,6 @@ class Exit(customtkinter.CTk):
             print("SQLite error:", e)
 
     def open_entry_details_button(self,selected_item):
-        print("Received selected item:", selected_item)
-        print(self.tree.selection())
         details_window = tk.Toplevel(self)
         details_window.title("Entry Details")
         details_window.geometry("400x450")
@@ -413,11 +397,11 @@ class Exit(customtkinter.CTk):
         tempo_str = str(time_difference)
 
         carencia = int(price_row[0]) if price_row else 0
-        primeira_faixa = float(price_row[1]) if price_row else 0.0  # Use float instead of int
+        primeira_faixa = float(price_row[1]) if price_row else 0.0
         demais_faixas = int(price_row[2]) if price_row else 0
         tempo_primeira_faixa = int(price_row[3]) if price_row else 0
         tempo_demais_faixas = int(price_row[4]) if price_row else 0
-        segunda_faixa = float(price_row[5]) if price_row else 0.0  # Use float instead of int
+        segunda_faixa = float(price_row[5]) if price_row else 0.0
         tempo_segunda_faixa = int(price_row[6]) if price_row else 0
 
         cursor.close()
@@ -492,17 +476,12 @@ class Exit(customtkinter.CTk):
                 if padrão_superior_texts:
                     for text in padrão_superior_texts:
                         text_content, _, ordem = text
-                        x_position = 0  # Starting x-position for the text
-                        y_position += 40  # Calculate y-position based on ordem value
+                        x_position = 0
+                        y_position += 40
 
-                        print(y_position)
-                        print(text_content)
-
-                        # Draw the text
                         pdc.TextOut(x_position, y_position, text_content)
 
-                y_position += 100  # Adjust y-position after PADRÃO SUPERIOR text
-
+                y_position += 100
                 pdc.TextOut(0, y_position, "PLACA: ")
                 pdc.TextOut((width - pdc.GetTextExtent(placa)[0]), y_position, placa)
                 y_position += 50  # Adjust y-position after PLACA text
@@ -542,8 +521,8 @@ class Exit(customtkinter.CTk):
                 cursor.execute('''CREATE TABLE IF NOT EXISTS history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                               placa TEXT,
-                                              data_entrada TEXT,
-                                              data_saida TEXT,
+                                              data_entrada DATE,
+                                              data_saida DATE,
                                               tempo_estadia TEXT,
                                               valor_total REAL,
                                               pagamento TEXT,
@@ -608,18 +587,15 @@ class Exit(customtkinter.CTk):
         if selected_indices:
             selected_index = selected_indices[0]
             selected_item = self.listbox.get(selected_index)
-            print("Selected item:", selected_item)
             self.open_entry_details(selected_item)
 
     def dar_saida(self):
         plate = self.entry1.get()  # Get the entered license plate
-        print("Plate:", plate)
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
         cursor.execute("SELECT placa, data, veiculo, operador_entrada FROM entry WHERE placa=?", (plate,))
         entry = cursor.fetchone()
         cursor.close()
-        print(entry)
 
         if entry:
             self.open_entry_details_button(entry)

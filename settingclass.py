@@ -51,6 +51,8 @@ class Settings(customtkinter.CTk):
 
                 def adicionar_user():
                     try:
+                        conn = sqlite3.connect('user_data.db')
+                        cursor = conn.cursor()
                         cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
                                            full_name TEXT,
@@ -66,6 +68,8 @@ class Settings(customtkinter.CTk):
 
                         cursor.execute('INSERT INTO users (full_name, username, password, role) VALUES (?, ?, ?, ?)',
                                        (full_name, username, password, role))
+                        conn.commit()
+                        cursor.close()
 
                         messagebox.showinfo(
                             "Sucesso", "Usuário cadastrado com sucesso!")
@@ -105,9 +109,11 @@ class Settings(customtkinter.CTk):
 
             def update_user_list():
                 try:
-
+                    conn = sqlite3.connect('user_data.db')
+                    cursor = conn.cursor()
                     cursor.execute("SELECT full_name, username, password, role, id FROM users")
                     users = cursor.fetchall()
+                    cursor.close()
                     tree.delete(*tree.get_children())
                     for user in users:
                         tree.insert('', tk.END, values=(user[0], user[1], user[2], user[3], user[4]))
@@ -123,28 +129,24 @@ class Settings(customtkinter.CTk):
                 details_window.title("Users Detail")
                 details_window.geometry("400x520")
                 details_window.configure(bg="#212121")
-                print(selected_item)
-                # Get the selected entry details
                 selected_full_name = selected_entry[0]
-                print(selected_full_name)
                 selected_username = selected_entry[1]
-                print(selected_username)
                 selected_password = selected_entry[2]
-                print(selected_password)
                 selected_role = selected_entry[3]
-                print(selected_role)
                 selected_id = selected_entry[4]
-                print(selected_id)
 
                 def cancel():
                     details_window.destroy()
 
                 def update_user():
                     try:
-
+                        conn = sqlite3.connect('user_data.db')
+                        cursor = conn.cursor()
                         cursor.execute(
                             "UPDATE users SET full_name=?, username=?, password=?, role=? WHERE id=?",
                             (firstname.get(), entry1.get(), entry2.get(), combo.get(), selected_id))
+                        conn.commit()
+                        cursor.close()
                         messagebox.showinfo(
                             "Sucesso", "Usuário atualizado com sucesso!")
                         details_window.destroy()
@@ -160,10 +162,13 @@ class Settings(customtkinter.CTk):
                         confirmation = messagebox.askyesno("Confirmar Remoção",
                                                            "Tem certeza de que deseja remover este usuário?")
                         if confirmation:
+                            conn = sqlite3.connect('user_data.db')
+                            cursor = conn.cursor()
                             selected_entry = tree.item(selected_item, "values")
                             selected_id = selected_entry[4]
                             cursor.execute("DELETE FROM users WHERE id=?", (selected_id,))
                             conn.commit()
+                            cursor.close()
                             update_user_list()
                             details_window.destroy()
 
@@ -238,17 +243,20 @@ class Settings(customtkinter.CTk):
     def price(self):
         Prices()
     def texts(self):
-            def add_user():
+            def add_texts():
                 adddetails_window = tk.Toplevel(self)
-                adddetails_window.title("Adicionar Usuário")
+                adddetails_window.title("Adicionar Frases")
                 adddetails_window.geometry("400x450")
                 adddetails_window.configure(bg="#212121")
 
                 def cancel():
                     adddetails_window.destroy()
 
-                def adicionar_user():
+                def adicionar_text():
                     try:
+                        conn = sqlite3.connect('user_data.db')
+                        cursor = conn.cursor()
+
                         cursor.execute('''CREATE TABLE IF NOT EXISTS texts (
                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
                                               text TEXT,
@@ -262,11 +270,12 @@ class Settings(customtkinter.CTk):
 
                         cursor.execute('INSERT INTO texts (text, type, ordem) VALUES (?, ?, ?)',
                                        (text_value, type_value, order_value))
-
+                        conn.commit()
+                        cursor.close()
                         messagebox.showinfo(
                             "Sucesso", "Texto cadastrado com sucesso!")
                         adddetails_window.destroy()
-                        update_user_list()
+                        update_text_list()
 
                     except sqlite3.Error as e:
                         print("SQLite error:", e)
@@ -286,7 +295,7 @@ class Settings(customtkinter.CTk):
                 order_entry.pack(pady=12, padx=10)
 
                 button = customtkinter.CTkButton(adddetails_window, width=300, height=40, text="CADASTRAR",
-                                                 command=adicionar_user)
+                                                 command=adicionar_text)
                 button.pack(pady=12, padx=24)
 
                 button1 = customtkinter.CTkButton(adddetails_window, width=300, height=40, text="CANCELAR",
@@ -294,12 +303,13 @@ class Settings(customtkinter.CTk):
                                                   command=cancel)
                 button1.pack(pady=12, padx=10)
 
-            def update_user_list():
+            def update_text_list():
                 try:
-
+                    conn = sqlite3.connect('user_data.db')
+                    cursor = conn.cursor()
                     cursor.execute("SELECT  text, type, ordem, id FROM texts")
                     texts = cursor.fetchall()
-
+                    cursor.close()
                     tree.delete(*tree.get_children())
                     for text in texts:
                         tree.insert('', tk.END, values=(text[0], text[1], text[2], text[3]))
@@ -317,7 +327,6 @@ class Settings(customtkinter.CTk):
                 details_window.title("Texts Detail")
                 details_window.geometry("400x520")
                 details_window.configure(bg="#212121")
-                print(selected_item)
                 # Get the selected entry details
                 selected_text = selected_entry[0]
                 selected_type = selected_entry[1]
@@ -329,14 +338,17 @@ class Settings(customtkinter.CTk):
 
                 def update_user():
                     try:
-
+                        conn = sqlite3.connect('user_data.db')
+                        cursor = conn.cursor()
                         cursor.execute(
                             "UPDATE texts SET text=?, type=?, ordem=? WHERE id=?",
                             (text.get(), combo.get(), selected_id, order_entry.get()))
+                        conn.commit()
+                        cursor.close()
                         messagebox.showinfo(
                             "Sucesso", "Frase atualizada com sucesso!")
                         details_window.destroy()
-                        update_user_list()
+                        update_text_list()
 
 
                     except sqlite3.Error as e:
@@ -348,11 +360,14 @@ class Settings(customtkinter.CTk):
                         confirmation = messagebox.askyesno("Confirmar Remoção",
                                                            "Tem certeza de que deseja remover esta frase?")
                         if confirmation:
+                            conn = sqlite3.connect('user_data.db')
+                            cursor = conn.cursor()
                             selected_entry = tree.item(selected_item, "values")
                             selected_id = selected_entry[3]
                             cursor.execute("DELETE FROM texts WHERE id=?", (selected_id,))
                             conn.commit()
-                            update_user_list()
+                            cursor.close()
+                            update_text_list()
                             details_window.destroy()
                 label = customtkinter.CTkLabel(details_window, width=300, height=40, font=("Roboto", 36),
                                                text="Alterar Frase")
@@ -393,7 +408,7 @@ class Settings(customtkinter.CTk):
             user_window.configure(bg="#212121")
 
             button_add = customtkinter.CTkButton(
-                user_window, width=240, height=32, text="ADICIONAR FRASES", command=add_user)
+                user_window, width=240, height=32, text="ADICIONAR FRASES", command=add_texts)
             button_add.pack(pady=12, padx=10)
 
             tree = tk.ttk.Treeview(user_window,
@@ -415,8 +430,7 @@ class Settings(customtkinter.CTk):
             tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
             treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
 
-            # Call the function to update the Listbox with existing entries
-            update_user_list()
+            update_text_list()
 
             tree.bind("<Double-1>", open_texts_details)
 

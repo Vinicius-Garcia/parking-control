@@ -175,7 +175,6 @@ class Lot(customtkinter.CTk):
 
     def draw_img(hdc, dib, maxh, maxw, y_position):
         w, h = dib.size
-        print("Image HW: ({:d}, {:d}), Max HW: ({:d}, {:d})".format(h, w, maxh, maxw))
         h = min(h, maxh)
         w = min(w, maxw)
         l = (maxw - w) // 2
@@ -224,18 +223,12 @@ class Lot(customtkinter.CTk):
 
         for text in padrão_superior_texts:
             text_content, _, ordem = text
-            x_position = 0  # Starting x-position for the text
-            y_position += 40  # Calculate y-position based on ordem value
+            x_position = 0
+            y_position += 40
 
-            print(y_position)
-            print(text_content)
-
-            # Draw the text
             pdc.TextOut(x_position, y_position, text_content)
 
-        y_position += 50  # Adjust y-position after PADRÃO SUPERIOR text
-
-        # Draw QR code centered
+        y_position += 50
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -250,8 +243,6 @@ class Lot(customtkinter.CTk):
         self.add_img(pdc, temp_qr_image_path, y_position)
 
         width = pdc.GetDeviceCaps(wcon.HORZRES)
-
-        print(width)
 
         y_position += 250  # Adjust y-position after QR code
 

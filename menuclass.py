@@ -14,7 +14,6 @@ class Menu(customtkinter.CTk):
         self.mainloop()
 
     def setup_ui(self, type_user, user):
-        print("User type:", type_user, user)
         user_type = type_user
 
         fr = customtkinter.CTkFrame(master=self)

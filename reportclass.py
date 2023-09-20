@@ -3,14 +3,15 @@ import sqlite3
 from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox, filedialog
-from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from openpyxl import Workbook
 from tkcalendar import Calendar, DateEntry
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from reportlab.lib.pagesizes import landscape, letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+import configparser  # Importe a biblioteca configparser
 
 class Report(customtkinter.CTk):
     def __init__(self):
@@ -28,6 +29,10 @@ class Report(customtkinter.CTk):
 
         self.total_card_label = customtkinter.CTkLabel(self.total_frame, text="Cartão: R$0.00")
         self.total_card_label.pack(padx=10, pady=10, side="left")
+
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        self.to_email = config['EMAIL_CONFIG']['to_email']
 
 
     def setup_ui(self):
@@ -117,10 +122,15 @@ class Report(customtkinter.CTk):
         try:
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
+            cursor.execute(
+                "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida FROM history ")
+            entries = cursor.fetchall()
+            start_datetime = f"{start_date} 00:00:00"
+            end_datetime = f"{end_date} 23:59:59"
 
             cursor.execute(
-                "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total,pagamento, veiculo, operador_entrada, operador_saida  FROM history WHERE data_saida BETWEEN ? AND ?",
-                (start_date, end_date))
+                "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida FROM history WHERE data_saida >= ? AND data_saida <= ?",
+                (start_datetime, end_datetime))
             entries = cursor.fetchall()
             self.tree.delete(*self.tree.get_children())
             for item in self.tree.get_children():
@@ -144,10 +154,10 @@ class Report(customtkinter.CTk):
             if not filename:
                 return
 
-            doc = SimpleDocTemplate(filename, pagesize=letter)
+            doc = SimpleDocTemplate(filename, pagesize=landscape(letter))
             data = []
 
-            header = ("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculo")
+            header = ("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculo", "Operador Entrada", "Operador Saida")
             data.append(header)
 
             for entry in self.tree.get_children():
@@ -184,7 +194,7 @@ class Report(customtkinter.CTk):
             ws = wb.active
             ws.title = "Relatório"
 
-            header = ["Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculos"]
+            header = ["Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculo", "Operador Entrada", "Operador Saida"]
             ws.append(header)
 
             for entry in self.tree.get_children():
@@ -240,11 +250,17 @@ class Report(customtkinter.CTk):
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'relatoriostatus@gmail.com'
-        smtp_password = '@Perto22'
+        smtp_password = 'lzxfdgaxxlujxykx'
 
-        to_email = 'viniciusgarcia1300@gmail.com'
+        to_email = self.to_email
 
-        subject = 'Relatório de Vendas'
+        start_date = self.start_date_entry.get()
+        end_date = self.end_date_entry.get()
+
+        start_datetime = f"{start_date} 00:00:00"
+        end_datetime = f"{end_date} 23:59:59"
+
+        subject = f'Relatório de Pagamentos - {start_datetime} - {end_datetime}'
 
         total_pix = 0
         total_cash = 0
@@ -253,10 +269,14 @@ class Report(customtkinter.CTk):
         count_cash = 0
         count_card = 0
 
+        total_cars = 0  # Inicializa o total de carros
+        total_motorcycles = 0  # Inicializa o total de motos
+
         for entry in self.tree.get_children():
             values = self.tree.item(entry)['values']
             valor_total = float(values[4])
             pagamento = values[5]
+            veiculo = values[6]  # Veículo está no índice 6
 
             if pagamento == "PIX":
                 total_pix += valor_total
@@ -268,10 +288,19 @@ class Report(customtkinter.CTk):
                 total_card += valor_total
                 count_card += 1
 
-        body = f"Total Pix: R${total_pix:.2f} (Quantidade: {count_pix})\n" \
-               f"Total Dinheiro: R${total_cash:.2f} (Quantidade: {count_cash})\n" \
-               f"Total Cartão: R${total_card:.2f} (Quantidade: {count_card})\n"
+            # Verifica se o veículo é carro ou moto e incrementa o total correspondente
+            if veiculo == "CARRO":
+                total_cars += 1
+            elif veiculo == "MOTO":
+                total_motorcycles += 1
 
+        # Cria a string para o corpo do email com os totais de carros e motos
+        body = f"Relatório de Pagamentos do Período de {start_datetime} - {end_datetime}\n" \
+               f"Total Pix: R${total_pix:.2f} (Quantidade: {count_pix})\n" \
+               f"Total Dinheiro: R${total_cash:.2f} (Quantidade: {count_cash})\n" \
+               f"Total Cartão: R${total_card:.2f} (Quantidade: {count_card})\n" \
+               f"Total de Carros: {total_cars}\n" \
+               f"Total de Motos: {total_motorcycles}\n"
 
         msg = MIMEMultipart()
         msg['From'] = smtp_username

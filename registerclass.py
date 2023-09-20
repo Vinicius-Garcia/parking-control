@@ -27,11 +27,8 @@ class UserRegistrationApp(customtkinter.CTk):
             )
         ''')
 
-        # Verificar se existe um usuário com o papel "gerente"
         cursor.execute("SELECT * FROM users WHERE role = 'GERENTE'")
         self.existe_gerente = cursor.fetchone() is not None
-        print(self.existe_gerente)
-        # Fechar a conexão com o banco de dados
         conn.close()
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=30, padx=120, fill="both", expand=True)

@@ -79,7 +79,7 @@ class Entry(customtkinter.CTk):
         # Call the function to update the Listbox with existing entries
         self.update_entry_list()
 
-        self.tree.bind("<Double-1>", self.open_entry_details)
+        self.tree.bind("<Double-1>", self.open_entry_details_list)
 
 
     def plate_exists(self,placa):
@@ -107,7 +107,7 @@ class Entry(customtkinter.CTk):
             cursor = conn.cursor()
 
             cursor.execute('''CREATE TABLE IF NOT EXISTS entry
-                             (placa TEXT, data TEXT, operador_entrada TEXT, veiculo TEXT)''')
+                             (placa TEXT, data DATE, operador_entrada TEXT, veiculo TEXT)''')
 
             if self.plate_exists(placa):
                 cursor.close()
@@ -119,9 +119,9 @@ class Entry(customtkinter.CTk):
             cursor.execute("INSERT INTO entry (placa, data, veiculo, operador_entrada) VALUES (?, ?, ?, ?)", (placa, data_atual, veiculo, self.user[1]))
 
             conn.commit()  # Commit the changes to the database
-
-            self.update_entry_list()  # Update the UI
             cursor.close()
+            self.update_entry_list()  # Update the UI
+
             self.open_entry_details('',placa, data_atual, veiculo,)
 
         except sqlite3.Error as e:
@@ -174,11 +174,51 @@ class Entry(customtkinter.CTk):
                                              command=lambda: self.print_entry(selected_entry, formatted_time))
             self.button.pack(pady=12, padx=10)
 
+    def open_entry_details_list(self, event=None):
+        details_window = tk.Toplevel(self)
+        details_window.title("Entry Details")
+        details_window.geometry("400x250")
+        details_window.configure(bg="#212121")
+
+        self.after(200, lambda: details_window.focus())
+
+        selected_item = self.tree.selection()[0] if self.tree.selection() else None
+        if selected_item:
+            selected_entry = self.tree.item(selected_item, "values")
+            placa = selected_entry[0]
+            data = selected_entry[1]
+            veiculo = selected_entry[2]
+
+            selected_time = datetime.strptime(data, '%d/%m/%Y %H:%M:%S')
+            locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
+            formatted_time = selected_time.strftime('%d/%m/%Y %H:%M:%S')
+
+            details_frame = tk.Frame(details_window, bg="#212121")
+            details_frame.pack(pady=20, padx=10, fill="both", expand=True)
+
+            details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text="TICKET",
+                                                   font=("Roboto", 24))
+            details_label.pack(pady=6, padx=10)
+
+            details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Placa: {placa}",
+                                                   font=("Roboto", 16), anchor='w')
+            details_label.pack(pady=6, padx=10, anchor="w")
+
+            details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Data: {formatted_time}",
+                                                   font=("Roboto", 16), anchor='w')
+            details_label.pack(pady=6, padx=10, anchor="w")
+            details_label = customtkinter.CTkLabel(details_frame, width=120, height=1, text=f"Veiculo: {veiculo}",
+                                                   font=("Roboto", 16), anchor='w')
+            details_label.pack(pady=6, padx=10, anchor="w")
+
+            self.button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET",
+                                                  command=lambda: self.print_entry(placa, formatted_time))
+            self.button.pack(pady=12, padx=10)
+
 
 
     def draw_img(self,hdc, dib, maxh, maxw, y_position):
             w, h = dib.size
-            print("Image HW: ({:d}, {:d}), Max HW: ({:d}, {:d})".format(h, w, maxh, maxw))
             h = min(h, maxh)
             w = min(w, maxw)
             l = (maxw - w) // 2
@@ -227,18 +267,12 @@ class Entry(customtkinter.CTk):
             if padrão_superior_texts:
                 for text in padrão_superior_texts:
                     text_content, _, ordem = text
-                    x_position = 0  # Starting x-position for the text
-                    y_position += 40  # Calculate y-position based on ordem value
-
-                    print(y_position)
-                    print(text_content)
-
-                    # Draw the text
+                    x_position = 0
+                    y_position += 40
                     pdc.TextOut(x_position, y_position, text_content)
 
-            y_position += 50  # Adjust y-position after PADRÃO SUPERIOR text
+            y_position += 50
 
-            # Draw QR code centered
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -254,13 +288,11 @@ class Entry(customtkinter.CTk):
 
             width = pdc.GetDeviceCaps(wcon.HORZRES)
 
-            print(width)
-
-            y_position += 250  # Adjust y-position after QR code
+            y_position += 250
 
             pdc.TextOut(0, y_position, "PLACA: ")
             pdc.TextOut((width - pdc.GetTextExtent(placa)[0]), y_position, placa)
-            y_position += 50  # Adjust y-position after PLACA text
+            y_position += 50
             pdc.TextOut(0, y_position, "DATA/HORA: ")
             pdc.TextOut((width - pdc.GetTextExtent(data)[0]), y_position, data)
             y_position += 20
@@ -279,6 +311,7 @@ class Entry(customtkinter.CTk):
             pdc.EndDoc()
             pdc.DeleteDC()
             win32print.ClosePrinter(hprinter)
+
 
 
     def update_entry_list(self):

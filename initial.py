@@ -6,14 +6,14 @@ conn = sqlite3.connect('user_data.db')
 cursor = conn.cursor()
 
 cursor.execute('''CREATE TABLE IF NOT EXISTS entry
-                (placa TEXT, data TEXT, operador_entrada TEXT, veiculo TEXT)''')
+                (placa TEXT, data DATE, operador_entrada TEXT, veiculo TEXT)''')
 
 
 cursor.execute('''CREATE TABLE IF NOT EXISTS history (
                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
                                               placa TEXT,
-                                              data_entrada TEXT,
-                                              data_saida TEXT,
+                                              data_entrada DATE,
+                                              data_saida DATE,
                                               tempo_estadia TEXT,
                                               veiculo TEXT,
                                               valor_total REAL,
@@ -37,7 +37,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS price (
                        segunda_faixa TEXT,
                        segunda_faixa_min TEXT,
                        demais_faixas TEXT,
-                       demais_faixas_min TEXT
+                       demais_faixas_min TEXT,
+                       veiculo TEXT
                    )''')
 
 cursor.execute('''CREATE TABLE IF NOT EXISTS users (
