@@ -11,7 +11,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-import configparser  # Importe a biblioteca configparser
+import configparser
+
 
 class EmailSender(customtkinter.CTk):
     def __init__(self):
