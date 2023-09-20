@@ -5,6 +5,7 @@ from settingclass import Settings
 from reportclass import Report
 from lotclass import Lot
 from entryclass import Entry
+from emailsender import EmailSender
 class Menu(customtkinter.CTk):
     def __init__(self, type_user, user):
         super().__init__()
@@ -28,15 +29,20 @@ class Menu(customtkinter.CTk):
         button2 = customtkinter.CTkButton(master=fr, width=480, height=48, text="REGISTRAR SAÍDA", command=self.open_saida)
         button2.pack(pady=12, padx=10)
 
+        button3 = customtkinter.CTkButton(master=fr, width=480, height=48, text="PÁTIO", command=self.open_patio)
+        button3.pack(pady=12, padx=10)
+
+        button7 = customtkinter.CTkButton(master=fr, width=480, height=48, text="EMAIL", command=self.open_email)
+        button7.pack(pady=12, padx=10)
+
         if user_type == "GERENTE" or user_type == "MASTER":
-            button3 = customtkinter.CTkButton(master=fr, width=480, height=48, text="PÁTIO", command=self.open_patio)
-            button3.pack(pady=12, padx=10)
+
 
             button4 = customtkinter.CTkButton(master=fr, width=480, height=48, text="RELATÓRIO", command=self.open_relatorio)
             button4.pack(pady=12, padx=10)
 
-        button5 = customtkinter.CTkButton(master=fr, width=480, height=48, text="CONFIGURAÇÃO", command=self.open_config)
-        button5.pack(pady=12, padx=10)
+            button5 = customtkinter.CTkButton(master=fr, width=480, height=48, text="CONFIGURAÇÃO", command=self.open_config)
+            button5.pack(pady=12, padx=10)
 
         button6 = customtkinter.CTkButton(master=fr, width=480, height=48, text="LOGOUT", fg_color='#91403d',
                                           command=self.logout)
@@ -60,6 +66,9 @@ class Menu(customtkinter.CTk):
 
     def open_config(self):
         Settings()
+
+    def open_email(self):
+        EmailSender()
 
     def logout(self):
         self.destroy()
