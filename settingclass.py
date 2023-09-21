@@ -2,6 +2,8 @@ import customtkinter
 import tkinter as tk
 from tkinter import messagebox
 import sqlite3
+
+from emails import Emails
 from prices import Prices
 
 conn = sqlite3.connect('user_data.db')
@@ -37,6 +39,9 @@ class Settings(customtkinter.CTk):
         button_price = customtkinter.CTkButton(
             master=fr, width=480, height=48, text="FRASES TICKET", command=self.texts)
         button_price.pack(pady=12, padx=10)
+        button_email = customtkinter.CTkButton(
+            master=fr, width=480, height=48, text="EMAIL", command=self.emails)
+        button_email.pack(pady=12, padx=10)
 
 
     def users(self):
@@ -239,6 +244,9 @@ class Settings(customtkinter.CTk):
             update_user_list()
 
             tree.bind("<Double-1>", open_users_details)
+
+    def emails(self):
+        Emails()
 
     def price(self):
         Prices()

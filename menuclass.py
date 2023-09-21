@@ -21,7 +21,7 @@ class Menu(customtkinter.CTk):
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
         label = customtkinter.CTkLabel(master=fr, width=120, height=48, text="GESTÃO DE ESTACIONAMENTO", font=("Roboto", 48))
-        label.pack(pady=(150, 10), padx=10)
+        label.pack(pady=(10, 10), padx=10)
 
         button1 = customtkinter.CTkButton(master=fr, width=480, height=48, text="REGISTRAR ENTRADA", command=self.open_entrada)
         button1.pack(pady=12, padx=10)

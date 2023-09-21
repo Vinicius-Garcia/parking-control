@@ -42,7 +42,7 @@ class Login(customtkinter.CTk):
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
         label = customtkinter.CTkLabel(master=fr, width=480, height=32, text="Login", font=("Roboto", 48))
-        label.pack(pady=(250, 20), padx=10)
+        label.pack(pady=(20, 20), padx=10)
 
         self.entry1 = customtkinter.CTkEntry(master=fr, width=480, height=48, placeholder_text="Usuário")
         self.entry1.pack(pady=12, padx=10)

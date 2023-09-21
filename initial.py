@@ -22,6 +22,12 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS history (
                                               operador_saida TEXT
                                             )''')
 
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS email (
+                                              id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                              email TEXT
+                                            )''')
+
 cursor.execute('''CREATE TABLE IF NOT EXISTS texts (
                       id INTEGER PRIMARY KEY AUTOINCREMENT,
                       text TEXT,

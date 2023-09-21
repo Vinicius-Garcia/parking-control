@@ -28,7 +28,10 @@ class Report(customtkinter.CTk):
         self.total_cash_label.pack(padx=10, pady=10, side="left")
 
         self.total_card_label = customtkinter.CTkLabel(self.total_frame, text="Cartão: R$0.00")
-        self.total_card_label.pack(padx=10, pady=10, side="left")
+        self.total_card_label.pack(padx=10, pady=10, side="left")\
+
+        self.total_label = customtkinter.CTkLabel(self.total_frame, text="Total: R$0.00")
+        self.total_label.pack(padx=10, pady=10, side="left")
 
         config = configparser.ConfigParser()
         config.read('config.ini')
@@ -242,6 +245,8 @@ class Report(customtkinter.CTk):
         self.total_pix_label.configure(text=f"Pix: R${self.total_pix:.2f} (Quantidade: {self.count_pix})")
         self.total_cash_label.configure(text=f"Dinheiro: R${self.total_cash:.2f} (Quantidade: {self.count_cash})")
         self.total_card_label.configure(text=f"Cartão: R${self.total_card:.2f} (Quantidade: {self.count_card})")
+        self.total_label.configure(text=f"Total: R${(self.total_card + self.total_pix + self.total_cash):.2f} (Quantidade: {(self.count_card + self.count_cash + self.count_pix)})")
+
 
     def run(self):
         self.mainloop()
