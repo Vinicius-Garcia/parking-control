@@ -125,9 +125,7 @@ class Report(customtkinter.CTk):
         try:
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
-            cursor.execute(
-                "SELECT placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida FROM history ")
-            entries = cursor.fetchall()
+
             start_datetime = f"{start_date} 00:00:00"
             end_datetime = f"{end_date} 23:59:59"
 

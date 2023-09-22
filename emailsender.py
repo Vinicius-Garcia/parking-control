@@ -220,7 +220,6 @@ class EmailSender(customtkinter.CTk):
 
         self.update_entry_list(start_datetime, end_datetime)
 
-        # Initialize instance variables to store totals and counts for each payment method
         self.total_pix = 0
         self.total_cash = 0
         self.total_card = 0

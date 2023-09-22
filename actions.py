@@ -6,15 +6,12 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from tkinter import messagebox
-
 import customtkinter
-
-from exitclass import Exit
-from settingclass import Settings
-from reportclass import Report
 from lotclass import Lot
-from entryclass import Entry
 from emailsender import EmailSender
+from reopen import Reopen
+
+
 class Actions(customtkinter.CTk):
     def __init__(self,):
         super().__init__()
@@ -34,21 +31,23 @@ class Actions(customtkinter.CTk):
         button3 = customtkinter.CTkButton(master=fr, width=480, height=36, text="PÁTIO", command=self.open_patio)
         button3.pack(pady=12, padx=10)
 
+        button8 = customtkinter.CTkButton(master=fr, width=480, height=36, text="REABRIR TICKET", command=self.reopen)
+        button8.pack(pady=12, padx=10)
+
         button7 = customtkinter.CTkButton(master=fr, width=480, height=36, text="EMAIL", command=self.open_email)
         button7.pack(pady=12, padx=10)
 
         button8 = customtkinter.CTkButton(master=fr, width=480, height=36, text="BACKUP", command=self.backup)
         button8.pack(pady=12, padx=10)
 
-
-
-
-
     def open_patio(self):
         Lot()
 
     def open_email(self):
         EmailSender()
+
+    def reopen(self):
+        Reopen()
 
     def backup(self):
         conn = sqlite3.connect('user_data.db')
@@ -103,8 +102,6 @@ class Actions(customtkinter.CTk):
         except Exception as e:
             print("Erro ao enviar o e-mail:", e)
             messagebox.showerror("Erro ao enviar E-mail", "Ocorreu um erro ao enviar o e-mail.")
-
-
 
 
 if __name__ == "__main__":

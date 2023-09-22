@@ -1,10 +1,8 @@
 import customtkinter
-
-from exitclass import Exit
-from settingclass import Settings
+from caixa import Caixa
 from reportclass import Report
-from entryclass import Entry
-from actions import Actions
+
+
 class Financial(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -20,12 +18,18 @@ class Financial(customtkinter.CTk):
         label = customtkinter.CTkLabel(master=fr, width=120, height=36, text="FINANCEIRO", font=("Roboto", 36))
         label.pack(pady=(10, 10), padx=10)
 
-        button4 = customtkinter.CTkButton(master=fr, width=480, height=36, text="RELATÓRIO", command=self.open_relatorio)
-        button4.pack(pady=12, padx=10)
+        button = customtkinter.CTkButton(master=fr, width=480, height=36, text="RELATÓRIO", command=self.open_relatorio)
+        button.pack(pady=12, padx=10)
+
+        button1 = customtkinter.CTkButton(master=fr, width=480, height=36, text="CAIXA", command=self.open_caixa)
+        button1.pack(pady=12, padx=10)
 
 
     def open_relatorio(self):
         Report()
+
+    def open_caixa(self):
+        Caixa()
 
 
 
