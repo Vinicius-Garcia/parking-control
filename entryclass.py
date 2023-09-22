@@ -104,6 +104,12 @@ class Entry(customtkinter.CTk):
         placa = self.entry1.get()
         veiculo = self.vehicle_type.get()
 
+
+        if len(placa) < 7:  # Use len(placa) to check the length
+            messagebox.showerror("Erro de Registro",
+                                 "Ocorreu um erro ao registrar a entrada, placa deve conter 7 dígitos.")
+            return
+
         self.entry1.delete(0,tk.END )
 
         try:
