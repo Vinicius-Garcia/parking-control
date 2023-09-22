@@ -170,10 +170,10 @@ class Lot(customtkinter.CTk):
         details_label.pack(pady=6, padx=10, anchor="w")
 
         button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET",
-                                         command=lambda: self.print_entry(selected_entry, formatted_time, veiculo))
+                                              command=lambda: self.print_entry(placa, formatted_time, details_window))
         button.pack(pady=12, padx=10)
 
-    def draw_img(hdc, dib, maxh, maxw, y_position):
+    def draw_img(self, hdc, dib, maxh, maxw, y_position):
         w, h = dib.size
         h = min(h, maxh)
         w = min(w, maxw)
@@ -192,14 +192,12 @@ class Lot(customtkinter.CTk):
         if new_page:
             hdc.EndPage()
 
-    def print_entry(self,placa, data, veiculo):
-
+    def print_entry(self, placa, data, details_window):
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
-
         cursor.execute("SELECT text, type, ordem FROM texts")
         texts = cursor.fetchall()
-
+        cursor.close()
         padrão_superior_texts = [text for text in texts if text[1] == 'PADRÃO SUPERIOR']
         qr_code_texts = [text for text in texts if text[1] == 'QR CODE']
         padrão_inferior_texts = [text for text in texts if text[1] == 'TICKET INFERIOR']
@@ -220,15 +218,15 @@ class Lot(customtkinter.CTk):
         })
 
         pdc.SelectObject(font)
-
-        for text in padrão_superior_texts:
-            text_content, _, ordem = text
-            x_position = 0
-            y_position += 40
-
-            pdc.TextOut(x_position, y_position, text_content)
+        if padrão_superior_texts:
+            for text in padrão_superior_texts:
+                text_content, _, ordem = text
+                x_position = 0
+                y_position += 40
+                pdc.TextOut(x_position, y_position, text_content)
 
         y_position += 50
+
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -238,38 +236,37 @@ class Lot(customtkinter.CTk):
         qr.add_data(placa)
         qr.make(fit=True)
         img = qr.make_image(fill_color="black", back_color="white")
-        temp_qr_image_path = "../temp_qr_image.png"
+        temp_qr_image_path = "temp_qr_image.png"
         img.save(temp_qr_image_path)
         self.add_img(pdc, temp_qr_image_path, y_position)
 
         width = pdc.GetDeviceCaps(wcon.HORZRES)
 
-        y_position += 250  # Adjust y-position after QR code
+        y_position += 250
 
         pdc.TextOut(0, y_position, "PLACA: ")
         pdc.TextOut((width - pdc.GetTextExtent(placa)[0]), y_position, placa)
-        y_position += 50  # Adjust y-position after PLACA text
-        pdc.TextOut(0, y_position, "VEICULO: ")
-        pdc.TextOut((width - pdc.GetTextExtent(veiculo)[0]), y_position, veiculo)
-        y_position += 50  # Adjust y-position after PLACA text
+        y_position += 50
         pdc.TextOut(0, y_position, "DATA/HORA: ")
         pdc.TextOut((width - pdc.GetTextExtent(data)[0]), y_position, data)
         y_position += 20
-        for text in padrão_inferior_texts:
-            text_content, _, ordem = text
-            l = width // 2
-            x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
+        if padrão_inferior_texts:
+            for text in padrão_inferior_texts:
+                text_content, _, ordem = text
+                l = width // 2
+                x_position = (width - pdc.GetTextExtent(text_content)[0]) // 2  # Calculate centered x-position
 
-            y_position += 40  # Calculate y-position based on ordem value
+                y_position += 40  # Calculate y-position based on ordem value
 
-            # Draw the text
-            pdc.TextOut(x_position, y_position, text_content)
+                # Draw the text
+                pdc.TextOut(x_position, y_position, text_content)
 
         pdc.EndPage()
         pdc.EndDoc()
         pdc.DeleteDC()
         win32print.ClosePrinter(hprinter)
-        cursor.close()
+
+        details_window.destroy()
 
     def update_entry_list(self):
         try:

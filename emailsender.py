@@ -251,12 +251,21 @@ class EmailSender(customtkinter.CTk):
         self.mainloop()
 
     def send_email(self):
+        conn = sqlite3.connect('user_data.db')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT email FROM email")
+        existing_record = cursor.fetchone()
+        cursor.close()
         smtp_server = 'smtp.gmail.com'
         smtp_port = 587
         smtp_username = 'relatoriostatus@gmail.com'
         smtp_password = 'lzxfdgaxxlujxykx'
 
-        to_email = self.to_email
+        if existing_record[0]:
+            to_email = existing_record[0]
+        else:
+            to_email = self.to_email
 
         start_date = self.start_date_entry.get()
         end_date = self.end_date_entry.get()
@@ -300,9 +309,10 @@ class EmailSender(customtkinter.CTk):
 
         # Cria a string para o corpo do email com os totais de carros e motos
         body = f"Relatório de Pagamentos do Período de {start_datetime} - {end_datetime}\n" \
-               f"Total Pix: R${total_pix:.2f} (Quantidade: {count_pix})\n" \
-               f"Total Dinheiro: R${total_cash:.2f} (Quantidade: {count_cash})\n" \
-               f"Total Cartão: R${total_card:.2f} (Quantidade: {count_card})\n" \
+               f"Pix: R${total_pix:.2f} (Quantidade: {count_pix})\n" \
+               f"Dinheiro: R${total_cash:.2f} (Quantidade: {count_cash})\n" \
+               f"Cartão: R${total_card:.2f} (Quantidade: {count_card})\n" \
+               f"Total: R${(total_card + total_cash + total_pix):.2f} (Quantidade: {(count_card + count_pix + count_cash)})\n" \
                f"Total de Carros: {total_cars}\n" \
                f"Total de Motos: {total_motorcycles}\n"
 

@@ -212,7 +212,7 @@ class Entry(customtkinter.CTk):
             details_label.pack(pady=6, padx=10, anchor="w")
 
             self.button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET",
-                                                  command=lambda: self.print_entry(placa, formatted_time))
+                                                  command=lambda: self.print_entry(placa, formatted_time, details_window))
             self.button.pack(pady=12, padx=10)
 
 
@@ -238,7 +238,7 @@ class Entry(customtkinter.CTk):
                 hdc.EndPage()
 
 
-    def print_entry(self,placa, data):
+    def print_entry(self,placa, data, details_window):
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
             cursor.execute("SELECT text, type, ordem FROM texts")
@@ -311,6 +311,8 @@ class Entry(customtkinter.CTk):
             pdc.EndDoc()
             pdc.DeleteDC()
             win32print.ClosePrinter(hprinter)
+
+            details_window.destroy()
 
 
 
