@@ -55,6 +55,14 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                    role TEXT
                )''')
 
+cursor.execute('''CREATE TABLE IF NOT EXISTS caixa (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   operacao TEXT,
+                    valor TEXT,
+                   usuario TEXT,
+                    data_operacao TEXT
+               )''')
+
 conn.commit()
 cursor.close()
 
