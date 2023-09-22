@@ -1,4 +1,4 @@
-
+import sqlite3
 from tkinter import ttk, messagebox, filedialog
 import customtkinter
 from datetime import datetime
@@ -50,8 +50,15 @@ class Caixa(customtkinter.CTk):
         self.end_date_entry.pack(padx=(0, 40), pady=5, anchor="w", side="left")
 
         self.generate_button = customtkinter.CTkButton(self.datesFrame, width=140, height=40, text="BUSCAR OPERAÇOES",
-                                                       command=self.registrar_entrada)
+                                                       command=self.generate_report)
         self.generate_button.pack(pady=10, padx=10, anchor="e", side="left")
+
+        self.entry = customtkinter.CTkButton(self.datesFrame, width=140, height=40, text="BUSCAR OPERAÇOES",
+                                                       command=self.registrar_entrada)
+        self.entry.pack(pady=10, padx=10, anchor="e", side="left")
+        self.exit = customtkinter.CTkButton(self.datesFrame, width=140, height=40, text="BUSCAR OPERAÇOES",
+                                                       command=self.registrar_saida)
+        self.exit.pack(pady=10, padx=10, anchor="e", side="left")
 
         self.generate = customtkinter.CTkFrame(master=fr)
         self.generate.pack(pady=10, padx=10, fill="both")
@@ -90,6 +97,41 @@ class Caixa(customtkinter.CTk):
         self.treeScroll.pack(side="right", fill="y", padx=(0, 10), pady=10)
 
         self.tree.pack(fill="both", expand=True, padx=(10, 0), pady=10)
+
+    def generate_report(self):
+        start_date = self.start_date_entry.get()
+        end_date = self.end_date_entry.get()
+
+        start_datetime = f"{start_date} 00:00:00"
+        end_datetime = f"{end_date} 23:59:59"
+
+        self.update_entry_list(start_datetime, end_datetime)
+
+    def update_entry_list(self, start_date, end_date):
+        try:
+            conn = sqlite3.connect('user_data.db')
+            cursor = conn.cursor()
+
+            start_datetime = f"{start_date} 00:00:00"
+            end_datetime = f"{end_date} 23:59:59"
+
+            cursor.execute(
+                "SELECT operacao, valor, usuario, data_operacao FROM caixa WHERE data_operacao >= ? AND data_operacao <= ?",
+                (start_datetime, end_datetime))
+            entries = cursor.fetchall()
+            self.tree.delete(*self.tree.get_children())
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+
+            for entry in entries:
+                operacao, valor, usuario, data_operacao= entry
+                self.tree.insert('', tk.END, values=(operacao, valor, usuario, data_operacao))
+
+            cursor.close()
+
+
+        except sqlite3.Error as e:
+            print("SQLite error:", e)
 
     def registrar_entrada(self):
         placa = input("Digite a placa do veículo: ")
