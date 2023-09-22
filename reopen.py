@@ -199,12 +199,12 @@ class Reopen(customtkinter.CTk):
             # Update the entry list
             self.update_entry_list(self.start_date_entry.get(), self.end_date_entry.get())
 
-            messagebox.showinfo("Ticket Reopened", "Ticket has been reopened and added to the entry list.")
+            messagebox.showinfo("Ticket Reaberto", "Ticket reaberto com sucesso")
             details_window.destroy()
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
-            messagebox.showerror("Error", "An error occurred while reopening the ticket.")
+            messagebox.showerror("Error", "Um erro ocorreu ao reabrir o ticket")
     def print_entry(self, placa, data, details_window):
         conn = sqlite3.connect('user_data.db')
         cursor = conn.cursor()
