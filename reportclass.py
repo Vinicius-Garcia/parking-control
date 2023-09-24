@@ -2,6 +2,8 @@ import customtkinter
 import sqlite3
 from datetime import datetime
 import tkinter as tk
+from tkinter import ttk, messagebox, filedialog
+
 from tkinter import messagebox, filedialog
 from reportlab.lib import colors
 from openpyxl import Workbook
@@ -10,7 +12,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from reportlab.lib.pagesizes import landscape, letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, PageBreak, Paragraph
 import configparser  # Importe a biblioteca configparser
 
 class Report(customtkinter.CTk):
@@ -19,19 +21,19 @@ class Report(customtkinter.CTk):
         self.after(0, lambda: self.state('zoomed'))
         self.setup_ui()
         self.total_frame = customtkinter.CTkFrame(master=self.generate2)
-        self.total_frame.pack(pady=10, padx=10, anchor="e")
+        self.total_frame.pack(pady=10, padx=5, anchor="w")
 
-        self.total_pix_label = customtkinter.CTkLabel(self.total_frame, text="Pix: R$0.00")
-        self.total_pix_label.pack(padx=10, pady=10, side="left")
+        self.total_pix_label = customtkinter.CTkLabel(self.total_frame, text="Pix: R$0.00", font=('Roboto', 12))
+        self.total_pix_label.pack(padx=10, pady=5, side="left")
 
-        self.total_cash_label = customtkinter.CTkLabel(self.total_frame, text="Dinheiro: R$0.00")
-        self.total_cash_label.pack(padx=10, pady=10, side="left")
+        self.total_cash_label = customtkinter.CTkLabel(self.total_frame, text="Dinheiro: R$0.00", font=('Roboto', 12))
+        self.total_cash_label.pack(padx=10, pady=5, side="left")
 
-        self.total_card_label = customtkinter.CTkLabel(self.total_frame, text="Cartão: R$0.00")
-        self.total_card_label.pack(padx=10, pady=10, side="left")\
+        self.total_card_label = customtkinter.CTkLabel(self.total_frame, text="Cartão: R$0.00", font=('Roboto', 12))
+        self.total_card_label.pack(padx=10, pady=5, side="left")\
 
-        self.total_label = customtkinter.CTkLabel(self.total_frame, text="Total: R$0.00")
-        self.total_label.pack(padx=10, pady=10, side="left")
+        self.total_label = customtkinter.CTkLabel(self.total_frame, text="Total: R$0.00", font=('Roboto', 12))
+        self.total_label.pack(padx=10, pady=5, side="left")
 
         config = configparser.ConfigParser()
         config.read('config.ini')
@@ -42,11 +44,11 @@ class Report(customtkinter.CTk):
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-        label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="RELATÓRIO", font=("Roboto", 24))
-        label.pack(pady=12, padx=10)
+        label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="RELATÓRIO", font=("Roboto", 16))
+        label.pack(pady=2, padx=10)
 
         self.datesFrame = customtkinter.CTkFrame(master=fr)
-        self.datesFrame.pack(pady=10, padx=10, anchor="center")
+        self.datesFrame.pack(pady=2, padx=10, anchor="center")
 
         start_date_label = customtkinter.CTkLabel(self.datesFrame, text="Data Inicial:")
         start_date_label.pack(padx=(10, 10), pady=5, side="left")
@@ -62,33 +64,51 @@ class Report(customtkinter.CTk):
                                    locale="pt_br")
         self.end_date_entry.pack(padx=(0, 40), pady=5, anchor="w", side="left")
 
-        self.generate_button = customtkinter.CTkButton(self.datesFrame, width=140, height=40, text="GERAR",
+        self.generate_button = customtkinter.CTkButton(self.datesFrame, width=140, height=20, text="GERAR",
                                                   command=self.generate_report)
         self.generate_button.pack(pady=10, padx=10, anchor="e", side="left")
 
 
         self.generate = customtkinter.CTkFrame(master=fr)
-        self.generate.pack(pady=10, padx=10, fill="both")
+        self.generate.pack(pady=2, padx=10, fill="both")
 
         self.generate2 = customtkinter.CTkFrame(self.generate)
-        self.generate2.pack(pady=10, padx=10, anchor="w", side="left")
+        self.generate2.pack(pady=2, padx=10, anchor="w", side="left")
 
         self.generate1 = customtkinter.CTkFrame(self.generate)
-        self.generate1.pack(pady=10, padx=10, anchor="e", side="right")
+        self.generate1.pack(pady=2, padx=10, anchor="e", side="right")
 
-        self.button = customtkinter.CTkButton(self.generate1, width=120, height=24, text="EXPORTAR PDF",
+        self.total_frame = customtkinter.CTkFrame(master=self.generate2)
+        self.total_frame.pack(pady=2, padx=10, anchor="w")
+
+        self.totaldeposito_label = customtkinter.CTkLabel(self.total_frame, text="Total de Depósito: R$0.00", font=('Roboto', 12))
+        self.totaldeposito_label.pack(padx=10, pady=10, side="left")
+
+        self.totalsaque_label = customtkinter.CTkLabel(self.total_frame, text="Total de Depósito: R$0.00", font=('Roboto', 12))
+        self.totalsaque_label.pack(padx=10, pady=10, side="left")
+
+        self.total_label_caixa = customtkinter.CTkLabel(self.total_frame, text="Total de Caixa: R$0.00", font=('Roboto', 12))
+        self.total_label_caixa.pack(padx=10, pady=10, side="left")
+
+        self.totalgeral = customtkinter.CTkLabel(self.total_frame, text="Total Geral: R$0.00", font=('Roboto', 12))
+        self.totalgeral.pack(padx=10, pady=10, side="left")
+
+        self.button = customtkinter.CTkButton(self.generate1, width=120, height=12, text="EXPORTAR PDF",
                                               command=self.export_pdf)
         self.button.pack(padx=10, pady=10, side="left")
 
-        self.button1 = customtkinter.CTkButton(self.generate1, width=120, height=24, text="EXPORTAR EXCEL",
+        self.button1 = customtkinter.CTkButton(self.generate1, width=120, height=12, text="EXPORTAR EXCEL",
                                                command=self.export_excel)
         self.button1.pack(padx=10, pady=10, side="left")
 
-        self.send_email_button = customtkinter.CTkButton(self.generate1, width=120, height=24, text="ENVIAR E-MAIL",
+        self.send_email_button = customtkinter.CTkButton(self.generate1, width=120, height=12, text="ENVIAR E-MAIL",
                                                          command=self.send_email)
         self.send_email_button.pack(padx=10, pady=10, side="left")
 
-        self.tree = tk.ttk.Treeview(master=fr,
+        self.tree_frame = customtkinter.CTkFrame(master=fr)
+        self.tree_frame.pack(fill="both", expand=True, padx=(10, 0), pady=10)
+
+        self.tree = tk.ttk.Treeview(self.tree_frame,
                                columns=(
                                "Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago",
                                "Pagamento","Veículo" ,"Operador Entrada", "Operador Saída"))
@@ -113,11 +133,36 @@ class Report(customtkinter.CTk):
         self.tree.column("#8", width=100)
         self.tree.column("#9", width=100)
 
-        self.treeScroll = tk.Scrollbar(master=fr)
+        self.treeScroll = tk.Scrollbar(self.tree_frame)
         self.treeScroll.configure(command=self.tree.yview)
         self.treeScroll.pack(side="right", fill="y", padx=(0, 10), pady=10)
 
         self.tree.pack(fill="both", expand=True, padx=(10, 0), pady=10)
+
+        self.tree2_frame = customtkinter.CTkFrame(master=fr)
+        self.tree2_frame.pack(fill="both", expand=True, padx=(10, 0), pady=10)
+
+        self.tree2 = tk.ttk.Treeview( self.tree2_frame,
+                                    columns=(
+                                        "Operação", "Valor", "Usuário", "Data da Operação", "Observação"))
+        self.tree2['show'] = 'headings'
+        self.tree2.heading("#1", text="Operação")
+        self.tree2.heading("#2", text="Valor")
+        self.tree2.heading("#3", text="Usuário")
+        self.tree2.heading("#4", text="Data da Operação")
+        self.tree2.heading("#5", text="Observação")
+
+        self.tree2.column("#1", width=50)
+        self.tree2.column("#2", width=50)
+        self.tree2.column("#3", width=100)
+        self.tree2.column("#4", width=100)
+        self.tree2.column("#5", width=200)
+
+        self.treeScroll2 = tk.Scrollbar( self.tree2_frame)
+        self.treeScroll2.configure(command=self.tree2.yview)
+        self.treeScroll2.pack(side="right", fill="y", padx=(0, 10), pady=10)
+
+        self.tree2.pack(fill="both", expand=True, padx=(10, 0), pady=10)
 
 
 
@@ -141,11 +186,61 @@ class Report(customtkinter.CTk):
                 placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida = entry
                 self.tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida))
 
+            cursor.execute(
+                "SELECT operacao, valor, usuario, data_operacao, observacao FROM caixa WHERE data_operacao >= ? AND data_operacao <= ?",
+                (start_datetime, end_datetime))
+            valores = cursor.fetchall()
+            self.tree2.delete(*self.tree2.get_children())
+
+            self.total_deposito = 0.0
+            self.total_retirada = 0.0
+
+            for entry in valores:
+                operacao, valor, usuario, data_operacao, observacao = entry
+                self.tree2.insert('', tk.END, values=(operacao, valor, usuario, data_operacao, observacao))
+
+                valor = float(valor)
+                # Calcule os totais com base na operação
+                if operacao == 'DEPÓSITO':
+                    self.total_deposito += valor
+                elif operacao == 'RETIRADA':
+                    self.total_retirada += valor
+
+            self.total_geral = self.total_deposito - self.total_retirada
+            self.update_total_labels(entries)  # Chame esta função para atualizar os rótulos dos totais
+
             cursor.close()
 
 
         except sqlite3.Error as e:
             print("SQLite error:", e)
+
+    def update_total_labels(self,  entries):
+        self.total_pix = 0
+        self.total_cash = 0
+        self.total_card = 0
+        self.count_pix = 0
+        self.count_cash = 0
+        self.count_card = 0
+
+        for entry in self.tree.get_children():
+            values = self.tree.item(entry)['values']
+            valor_total = float(values[4])
+            pagamento = values[5]
+            if pagamento == "PIX":
+                self.total_pix += valor_total
+                self.count_pix += 1
+            elif pagamento == "DINHEIRO":
+                self.total_cash += valor_total
+                self.count_cash += 1
+            elif pagamento == "CARTÃO":
+                self.total_card += valor_total
+                self.count_card += 1
+
+        self.totaldeposito_label.configure(text=f"Total de Depósito: R${self.total_deposito:.2f}")
+        self.totalsaque_label.configure(text=f"Total de Retirada: R${self.total_retirada:.2f}")
+        self.total_label_caixa.configure(text=f"Total de Caixa: R${self.total_geral:.2f}")
+        self.totalgeral.configure(text=f"Total Geral: R${(self.total_card + self.total_pix + self.total_cash + self.total_geral):.2f}")
 
     def export_pdf(self):
         try:
@@ -156,17 +251,51 @@ class Report(customtkinter.CTk):
                 return
 
             doc = SimpleDocTemplate(filename, pagesize=landscape(letter))
-            data = []
+            elements = []
 
-            header = ("Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculo", "Operador Entrada", "Operador Saida")
-            data.append(header)
-
+            # Create the first table for the first table
+            data1 = []
+            header1 = (
+            "Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculo",
+            "Operador Entrada", "Operador Saida")
+            data1.append(header1)
+            valor = 0
             for entry in self.tree.get_children():
                 values = self.tree.item(entry)['values']
-                data.append(values)
+                data1.append(values)
+                valor += float(values[4])
+            table1 = Table(data1)
+            table1.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.aqua),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
 
-            table = Table(data)
-            table.setStyle(TableStyle([
+            elements.append(table1)
+            total_text = f"Total: {valor}"
+            total_paragraph = Paragraph(total_text, )  # Replace 'style' with your desired style
+            elements.append(total_paragraph)
+            elements.append(PageBreak())  # Add a page break between tables
+
+            # Create the second table for the second table
+            data2 = []
+            header2 = ("Operação", "Valor", "Usuário", "Data da Operação", "Observação")
+            data2.append(header2)
+            valor_caixa = 0
+            for entry in self.tree2.get_children():
+                values = self.tree2.item(entry)['values']
+                data2.append(values)
+                if values[0] == 'RETIRADA':
+                    valor_caixa -= values[1]
+                else:
+                    valor_caixa += values[1]
+
+            table2 = Table(data2)
+            table2.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -176,7 +305,11 @@ class Report(customtkinter.CTk):
                 ('GRID', (0, 0), (-1, -1), 1, colors.black)
             ]))
 
-            doc.build([table])
+            elements.append(table2)
+            total_text = f"Total: {valor_caixa}"
+            total_paragraph = Paragraph(total_text, )  # Replace 'style' with your desired style
+            elements.append(total_paragraph)
+            doc.build(elements)
 
             messagebox.showinfo("Export PDF", "Dados exportados para PDF com sucesso!")
 
@@ -192,17 +325,32 @@ class Report(customtkinter.CTk):
                 return
 
             wb = Workbook()
-            ws = wb.active
-            ws.title = "Relatório"
 
-            header = ["Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento", "Veiculo", "Operador Entrada", "Operador Saida"]
-            ws.append(header)
+            # Create the first worksheet for the first table
+            ws1 = wb.active
+            ws1.title = "Relatório de Entrada e Saída"
+
+            header1 = ["Placa", "Data de Entrada", "Data de Saída", "Tempo de Permanência", "Valor Pago", "Pagamento",
+                       "Veiculo", "Operador Entrada", "Operador Saida"]
+            ws1.append(header1)
 
             for entry in self.tree.get_children():
                 values = self.tree.item(entry)['values']
-                ws.append(values)
+                ws1.append(values)
 
+            # Create the second worksheet for the second table
+            ws2 = wb.create_sheet(title="Relatório de Caixa")
+
+            header2 = ["Operação", "Valor", "Usuário", "Data da Operação", "Observação"]
+            ws2.append(header2)
+
+            for entry in self.tree2.get_children():
+                values = self.tree2.item(entry)['values']
+                ws2.append(values)
+
+            # Save the workbook to the specified file
             wb.save(filename)
+
             messagebox.showinfo("Export Excel", "Dados exportados para Excel com sucesso!")
 
         except Exception as e:
@@ -217,7 +365,6 @@ class Report(customtkinter.CTk):
 
         self.update_entry_list(start_datetime, end_datetime)
 
-        # Initialize instance variables to store totals and counts for each payment method
         self.total_pix = 0
         self.total_cash = 0
         self.total_card = 0
@@ -225,11 +372,11 @@ class Report(customtkinter.CTk):
         self.count_cash = 0
         self.count_card = 0
 
+
         for entry in self.tree.get_children():
             values = self.tree.item(entry)['values']
-            valor_total = float(values[4])  # Valor total está no índice 4
-            pagamento = values[5]  # Tipo de pagamento está no índice 5
-
+            valor_total = float(values[4])
+            pagamento = values[5]
             if pagamento == "PIX":
                 self.total_pix += valor_total
                 self.count_pix += 1
@@ -240,6 +387,7 @@ class Report(customtkinter.CTk):
                 self.total_card += valor_total
                 self.count_card += 1
 
+        self.totalmesmo = self.total_card + self.total_pix + self.total_cash
         self.total_pix_label.configure(text=f"Pix: R${self.total_pix:.2f} (Quantidade: {self.count_pix})")
         self.total_cash_label.configure(text=f"Dinheiro: R${self.total_cash:.2f} (Quantidade: {self.count_cash})")
         self.total_card_label.configure(text=f"Cartão: R${self.total_card:.2f} (Quantidade: {self.count_card})")
@@ -286,6 +434,9 @@ class Report(customtkinter.CTk):
         total_cars = 0  # Inicializa o total de carros
         total_motorcycles = 0  # Inicializa o total de motos
 
+        total_deposito = 0
+        total_saque = 0
+
         for entry in self.tree.get_children():
             values = self.tree.item(entry)['values']
             valor_total = float(values[4])
@@ -308,14 +459,28 @@ class Report(customtkinter.CTk):
             elif veiculo == "MOTO":
                 total_motorcycles += 1
 
+        for entry in self.tree2.get_children():
+            values = self.tree2.item(entry)['values']
+            operacao = values[0]
+
+            if operacao == "RETIRADA":
+                total_saque += float(values[1])
+            else:
+                total_deposito += float(values[1])
+
+
         # Cria a string para o corpo do email com os totais de carros e motos
         body = f"Relatório de Pagamentos do Período de {start_datetime} - {end_datetime}\n" \
                f"Pix: R${total_pix:.2f} (Quantidade: {count_pix})\n" \
                f"Dinheiro: R${total_cash:.2f} (Quantidade: {count_cash})\n" \
                f"Cartão: R${total_card:.2f} (Quantidade: {count_card})\n" \
-               f"Total: R${(total_card + total_cash + total_pix):.2f} (Quantidade: {(count_card+ count_pix + count_cash)})\n" \
-               f"Total de Carros: {total_cars}\n" \
-               f"Total de Motos: {total_motorcycles}\n"
+               f"Total Arrecadado em Ticket: R${(total_card + total_cash + total_pix):.2f} (Quantidade: {(count_card+ count_pix + count_cash)})\n" \
+               f"Total de Pagamentos de Carros: {total_cars}\n" \
+               f"Total de Pagamentos de Motos: {total_motorcycles}\n" \
+               f"Total de Saque do Caixa:  R$ {total_saque}\n" \
+               f"Total de Depósito no Caixa:  R$ {total_deposito}\n" \
+               f"Total do Caixa:  R$ {total_deposito - total_saque}\n" \
+               f"Total Geral:  R$ {((total_deposito - total_saque) + (total_card + total_pix + total_cash))}\n"
 
         msg = MIMEMultipart()
         msg['From'] = smtp_username

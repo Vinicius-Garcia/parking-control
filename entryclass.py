@@ -181,9 +181,16 @@ class Entry(customtkinter.CTk):
             details_frame, width=120, height=1, text="RECIBO", font=("Roboto", 24))
         details_label.pack(pady=6, padx=10)
 
-        details_label = customtkinter.CTkLabel(
-            details_frame, width=120, height=1, text=f"Placa: {selected_entry}", font=("Roboto", 16), anchor='w')
-        details_label.pack(pady=6, padx=10, anchor="w")
+        frame_plate = tk.Frame(details_frame, bg="#212121")
+        frame_plate.pack(fill="x")
+
+        labelplaca = customtkinter.CTkLabel(frame_plate, width=120, height=1, text="PLACA:",
+                                                 font=("Roboto", 16))
+        labelplaca.pack(side="left")
+
+        plate_entry = customtkinter.CTkEntry(
+            frame_plate, width=120, height=1, font=("Roboto", 16))
+        plate_entry.pack( side="left")
 
         details_label = customtkinter.CTkLabel(
             details_frame, width=120, height=1, text=f"Data: {formatted_time}", font=("Roboto", 16), anchor='w')
@@ -197,6 +204,7 @@ class Entry(customtkinter.CTk):
             font=("Roboto", 16), anchor='w')
         details_label.pack(pady=6, padx=10, anchor="w")
 
+        plate_entry.insert(0, selected_entry)
         try:
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
@@ -254,6 +262,8 @@ class Entry(customtkinter.CTk):
 
         def move_to_history(placa, entrada, saida, tempo, pagamento, operador_entrada):
             pagamento = combo.get()
+            placa_editada=plate_entry.get()
+            print(placa_editada)
 
             def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, operador_entrada):
 
@@ -385,7 +395,7 @@ class Entry(customtkinter.CTk):
                 cursor.execute("DELETE FROM entry WHERE placa = ?", (placa,))
                 conn.commit()
                 cursor.close()
-                print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, operador_entrada)
+                print_recibo(placa_editada, entrada, saida, tempo_str, valor_total, pagamento, operador_entrada)
                 self.update_entry_list()
 
             except sqlite3.Error as e:

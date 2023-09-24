@@ -60,7 +60,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS caixa (
                    operacao TEXT,
                     valor TEXT,
                    usuario TEXT,
-                    data_operacao DATE
+                    data_operacao DATE,
+                    observacao TEXT
                )''')
 
 conn.commit()

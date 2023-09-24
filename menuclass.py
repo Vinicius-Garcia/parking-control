@@ -29,16 +29,14 @@ class Menu(customtkinter.CTk):
                                           command=self.open_actions)
         button2.pack(pady=12, padx=10)
 
+        button4 = customtkinter.CTkButton(master=fr, width=480, height=36, text="FINANCEIRO",
+                                          command=self.open_relatorio)
+        button4.pack(pady=12, padx=10)
+
         if user_type == "GERENTE" or user_type == "MASTER":
-
-
-            button4 = customtkinter.CTkButton(master=fr, width=480, height=36, text="FINANCEIRO", command=self.open_relatorio)
-            button4.pack(pady=12, padx=10)
 
             button5 = customtkinter.CTkButton(master=fr, width=480, height=36, text="CONFIGURAÇÃO", command=self.open_config)
             button5.pack(pady=12, padx=10)
-
-
 
         button6 = customtkinter.CTkButton(master=fr, width=480, height=36, text="LOGOUT", fg_color='#91403d',
                                           command=self.logout)
@@ -57,7 +55,7 @@ class Menu(customtkinter.CTk):
         Exit(self.user)
 
     def open_relatorio(self):
-        Financial()
+        Financial(self.user)
 
     def open_config(self):
         Settings()
