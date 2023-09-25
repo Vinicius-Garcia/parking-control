@@ -182,6 +182,8 @@ class Report(customtkinter.CTk):
             for item in self.tree.get_children():
                 self.tree.delete(item)
 
+
+
             for entry in entries:
                 placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida = entry
                 self.tree.insert('', tk.END, values=(placa, data_entrada, data_saida, tempo_estadia, valor_total, pagamento, veiculo, operador_entrada, operador_saida))

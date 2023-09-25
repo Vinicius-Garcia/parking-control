@@ -31,8 +31,8 @@ class Actions(customtkinter.CTk):
         button3 = customtkinter.CTkButton(master=fr, width=480, height=36, text="PÁTIO", command=self.open_patio)
         button3.pack(pady=12, padx=10)
 
-        button8 = customtkinter.CTkButton(master=fr, width=480, height=36, text="REABRIR TICKET", command=self.reopen)
-        button8.pack(pady=12, padx=10)
+        #button8 = customtkinter.CTkButton(master=fr, width=480, height=36, text="REABRIR TICKET", command=self.reopen)
+        #button8.pack(pady=12, padx=10)
 
         button7 = customtkinter.CTkButton(master=fr, width=480, height=36, text="RELATÓRIO POR EMAIL", command=self.open_email)
         button7.pack(pady=12, padx=10)

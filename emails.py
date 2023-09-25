@@ -69,7 +69,7 @@ class Emails(customtkinter.CTk):
                         print("SQLite error:", e)
 
         label = customtkinter.CTkLabel(master=fr, width=300, height=40, font=("Roboto", 36),
-                                               text="Tabela de Preços")
+                                               text="EMAIL DESTINO RELATÓRIOS")
         label.pack(pady=12, padx=10)
 
         carencia_label = customtkinter.CTkLabel(

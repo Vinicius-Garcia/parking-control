@@ -100,8 +100,14 @@ class Entry(customtkinter.CTk):
             self.send_entry()  # Trigger the entry process
             self.open_entry_details(selected_item)  # Open the print ticket screen
 
-    def send_entry(self):
-        placa = self.entry1.get()
+    def send_entry(self, placa=None, frame=None):
+
+        if placa:
+            frame.destroy()
+            placa = placa
+        else:
+            placa = self.entry1.get()
+
         veiculo = self.vehicle_type.get()
 
 
@@ -150,7 +156,7 @@ class Entry(customtkinter.CTk):
 
     def open_entry_details_button(self,selected_item):
         details_window = tk.Toplevel(self)
-        details_window.title("Entry Details")
+        details_window.title("RECIBO DE PAGAMENTO")
         details_window.geometry("400x450")
         details_window.configure(bg="#212121")
         print(selected_item)
@@ -254,7 +260,7 @@ class Entry(customtkinter.CTk):
                                                        anchor='w')
         valor_total_brl_label.pack(pady=6, padx=10, anchor="w")
 
-        combo = customtkinter.CTkComboBox(details_frame, width=400, height=40, values=["PIX", "CARTÃO", "DINHEIRO"])
+        combo = customtkinter.CTkComboBox(details_frame, width=400, height=40, values=["--", "PIX", "CARTÃO", "DINHEIRO"])
         combo.pack(pady=12, padx=10)
 
         pagamento = combo.get()
@@ -262,8 +268,11 @@ class Entry(customtkinter.CTk):
 
         def move_to_history(placa, entrada, saida, tempo, pagamento, operador_entrada):
             pagamento = combo.get()
+            print(pagamento)
+            if pagamento == '--':
+                messagebox.showerror("ERRO", "ESCOLHA UMA FORMA DE PAGAMENTO")
+                return
             placa_editada=plate_entry.get()
-            print(placa_editada)
 
             def print_recibo(placa, entrada, saida, tempo_str, valor_total, pagamento, operador_entrada):
 
@@ -408,7 +417,7 @@ class Entry(customtkinter.CTk):
 
     def open_entry_details(self,event, plate, date, veiculo):
             details_window = tk.Toplevel(self)
-            details_window.title("Entry Details")
+            details_window.title("Ticket")
             details_window.geometry("400x250")
             details_window.configure(bg="#212121")
 
@@ -451,10 +460,13 @@ class Entry(customtkinter.CTk):
                                              command=lambda: self.print_entry(selected_entry, formatted_time, details_window))
             self.button.pack(pady=12, padx=10)
 
+            self.button.bind("<Return>", lambda : self.enter_pressed_ticket(selected_entry, formatted_time, details_window))
+
+
     def open_entry_details_list(self, event=None):
         details_window = tk.Toplevel(self)
-        details_window.title("Entry Details")
-        details_window.geometry("400x250")
+        details_window.title("TICKET")
+        details_window.geometry("400x300")
         details_window.configure(bg="#212121")
 
         self.after(200, lambda: details_window.focus())
@@ -491,6 +503,10 @@ class Entry(customtkinter.CTk):
             self.button = customtkinter.CTkButton(details_frame, width=240, height=32, text="IMPRIMIR TICKET",
                                                   command=lambda: self.print_entry(placa, formatted_time, details_window))
             self.button.pack(pady=12, padx=10)
+
+            self.button1 = customtkinter.CTkButton(details_frame, width=240, height=32,fg_color='#91403d', text="DAR SAIDA",
+                                                  command=lambda: self.send_entry(placa, details_window))
+            self.button1.pack(pady=12, padx=10)
 
 
 
@@ -612,6 +628,9 @@ class Entry(customtkinter.CTk):
 
     def enter_pressed(self,event):
         self.send_entry()
+
+    def enter_pressed_ticket(self, selected_entry, formatted_time, details_window):
+        self.print_entry(selected_entry, formatted_time, details_window)
 
     def set_focus(self):
         self.entry1.focus_set()

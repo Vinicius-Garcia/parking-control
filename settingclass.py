@@ -26,7 +26,7 @@ class Settings(customtkinter.CTk):
 
 
         label = customtkinter.CTkLabel(master=fr, text="CONFIGURAÇÕES", font=("Roboto", 32))
-        label.pack(padx=(10, 10), pady=(150, 20), )
+        label.pack(padx=(10, 10), pady=20, )
 
         button_users = customtkinter.CTkButton(
             master=fr, width=480, height=48, text="USUÁRIOS", command=self.users)

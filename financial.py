@@ -23,7 +23,7 @@ class Financial(customtkinter.CTk):
             button = customtkinter.CTkButton(master=fr, width=480, height=36, text="RELATÓRIO", command=self.open_relatorio)
             button.pack(pady=12, padx=10)
 
-        button1 = customtkinter.CTkButton(master=fr, width=480, height=36, text="CAIXA", command=self.open_caixa)
+        button1 = customtkinter.CTkButton(master=fr, width=480, height=36, text="OPERAÇÕES MANUAIS", command=self.open_caixa)
         button1.pack(pady=12, padx=10)
 
 

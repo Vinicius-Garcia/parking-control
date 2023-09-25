@@ -1,3 +1,5 @@
+from tkinter import messagebox
+
 import customtkinter
 import os
 import sqlite3
@@ -70,13 +72,15 @@ class Login(customtkinter.CTk):
         cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
         user = cursor.fetchone()
 
-        user_type = user[4]
+
 
         if user:
+            user_type = user[4]
             Menu(user_type, user)
            # self.destroy()  # Fecha a janela de login
         else:
-            self.label_status.config(text="Login failed. Please try again.")
+            messagebox.showerror("Erro no Login",
+                                 "Usuário ou Senha incorreto.")
 
     def enter_pressed(self,event):
         self.loginfunction()

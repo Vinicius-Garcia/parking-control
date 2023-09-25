@@ -33,7 +33,7 @@ class Caixa(customtkinter.CTk):
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
-        label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="CAIXA", font=("Roboto", 24))
+        label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="OPERAÇÕES MANUAIS", font=("Roboto", 24))
         label.pack(pady=12, padx=10)
 
         self.search = customtkinter.CTkFrame(master=fr)
@@ -218,7 +218,7 @@ class Caixa(customtkinter.CTk):
 
         price_window = tk.Toplevel(self)
         price_window.title("SAQUE")
-        price_window.geometry("400x700")
+        price_window.geometry("400x400")
         price_window.configure(bg="#212121")
 
         label = customtkinter.CTkLabel(price_window, width=300, height=40, font=("Roboto", 36),
@@ -276,7 +276,7 @@ class Caixa(customtkinter.CTk):
 
         price_window = tk.Toplevel(self)
         price_window.title("DEPÓSITO")
-        price_window.geometry("400x700")
+        price_window.geometry("400x400")
         price_window.configure(bg="#212121")
 
         label = customtkinter.CTkLabel(price_window, width=300, height=40, font=("Roboto", 36),
