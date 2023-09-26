@@ -460,7 +460,8 @@ class Entry(customtkinter.CTk):
                                              command=lambda: self.print_entry(selected_entry, formatted_time, details_window))
             self.button.pack(pady=12, padx=10)
 
-            self.button.bind("<Return>", lambda : self.enter_pressed_ticket(selected_entry, formatted_time, details_window))
+            details_window.bind("<Return>",
+                                lambda event, p=placa, d=formatted_time, w=details_window: self.print_entry(p, d, w))
 
 
     def open_entry_details_list(self, event=None):
