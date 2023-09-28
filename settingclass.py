@@ -29,20 +29,27 @@ class Settings(customtkinter.CTk):
         label.pack(padx=(10, 10), pady=20, )
 
         button_users = customtkinter.CTkButton(
-            master=fr, width=480, height=48, text="USUÁRIOS", command=self.users)
+            master=fr, width=480, height=36, text="USUÁRIOS", command=self.users)
         button_users.pack(pady=12, padx=10)
 
         button_price = customtkinter.CTkButton(
-            master=fr, width=480, height=48, text="TABELA DE PREÇO", command=self.price)
+            master=fr, width=480, height=36, text="TABELA DE PREÇO", command=self.price)
         button_price.pack(pady=12, padx=10)
 
         button_price = customtkinter.CTkButton(
-            master=fr, width=480, height=48, text="FRASES TICKET", command=self.texts)
+            master=fr, width=480, height=36, text="FRASES TICKET", command=self.texts)
         button_price.pack(pady=12, padx=10)
         button_email = customtkinter.CTkButton(
-            master=fr, width=480, height=48, text="EMAIL", command=self.emails)
+            master=fr, width=480, height=36, text="EMAIL", command=self.emails)
         button_email.pack(pady=12, padx=10)
 
+        button9 = customtkinter.CTkButton(master=fr, width=480, height=36, fg_color='#91403d', text="VOLTAR",
+                                          command=self.voltar)
+        button9.pack(pady=12, padx=10)
+
+
+    def voltar(self):
+        self.destroy()
 
     def users(self):
             def add_user():

@@ -45,10 +45,14 @@ class Menu(customtkinter.CTk):
 
 
 
+
     # Funções para os botões
 
     def open_entrada(self):
         Entry(self.user)
+
+
+
     def open_actions(self):
         Actions()
     def open_saida(self):

@@ -26,9 +26,17 @@ class Financial(customtkinter.CTk):
         button1 = customtkinter.CTkButton(master=fr, width=480, height=36, text="OPERAÇÕES MANUAIS", command=self.open_caixa)
         button1.pack(pady=12, padx=10)
 
+        button9 = customtkinter.CTkButton(master=fr, width=480, height=36, fg_color='#91403d', text="VOLTAR",
+                                          command=self.voltar)
+        button9.pack(pady=12, padx=10)
+
+
 
     def open_relatorio(self):
         Report()
+
+    def voltar(self):
+        self.destroy()
 
     def open_caixa(self):
         Caixa(self.user)

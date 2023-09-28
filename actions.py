@@ -40,8 +40,15 @@ class Actions(customtkinter.CTk):
         button8 = customtkinter.CTkButton(master=fr, width=480, height=36, text="BACKUP BANCO DE DADOS", command=self.backup)
         button8.pack(pady=12, padx=10)
 
+        button9 = customtkinter.CTkButton(master=fr, width=480, height=36,fg_color='#91403d', text="VOLTAR",
+                                          command= self.voltar)
+        button9.pack(pady=12, padx=10)
+
     def open_patio(self):
         Lot()
+
+    def voltar(self):
+        self.destroy()
 
     def open_email(self):
         EmailSender()
