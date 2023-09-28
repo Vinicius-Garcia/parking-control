@@ -349,10 +349,6 @@ class Settings(customtkinter.CTk):
                     try:
                         conn = sqlite3.connect('user_data.db')
                         cursor = conn.cursor()
-                        print(text.get())
-                        print(combo.get())
-                        print(selected_id)
-                        print(order_entry.get())
                         cursor.execute(
                             "UPDATE texts SET text=?, type=?, ordem=? WHERE id=?",
                             (text.get(), combo.get(),  order_entry.get(), selected_id,))
