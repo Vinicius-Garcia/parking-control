@@ -55,7 +55,7 @@ class Settings(customtkinter.CTk):
             def add_user():
                 adddetails_window = tk.Toplevel(self)
                 adddetails_window.title("Adicionar Usuário")
-                adddetails_window.geometry("400x450")
+                adddetails_window.after(0, lambda:  adddetails_window.state('zoomed'))
                 adddetails_window.configure(bg="#212121")
 
                 def cancel():
@@ -139,7 +139,7 @@ class Settings(customtkinter.CTk):
                 selected_entry = tree.item(selected_item, "values")
                 details_window = tk.Toplevel(self)
                 details_window.title("Users Detail")
-                details_window.geometry("400x520")
+                details_window.after(0, lambda: details_window.state('zoomed'))
                 details_window.configure(bg="#212121")
                 selected_full_name = selected_entry[0]
                 selected_username = selected_entry[1]
@@ -221,7 +221,7 @@ class Settings(customtkinter.CTk):
 
             user_window = tk.Toplevel(self)
             user_window.title("Lista de Usuários")
-            user_window.geometry("600x450")
+            user_window.after(0, lambda: user_window.state('zoomed'))
             user_window.configure(bg="#212121")
 
             button_add = customtkinter.CTkButton(
@@ -261,7 +261,7 @@ class Settings(customtkinter.CTk):
             def add_texts():
                 adddetails_window = tk.Toplevel(self)
                 adddetails_window.title("Adicionar Frases")
-                adddetails_window.geometry("400x450")
+                adddetails_window.after(0, lambda: adddetails_window.state('zoomed'))
                 adddetails_window.configure(bg="#212121")
 
                 def cancel():
@@ -341,7 +341,7 @@ class Settings(customtkinter.CTk):
                 selected_entry = tree.item(selected_item, "values")
                 details_window = tk.Toplevel(self)
                 details_window.title("Texts Detail")
-                details_window.geometry("400x520")
+                details_window.after(0, lambda: details_window.state('zoomed'))
                 details_window.configure(bg="#212121")
                 # Get the selected entry details
                 selected_text = selected_entry[0]
@@ -420,7 +420,7 @@ class Settings(customtkinter.CTk):
 
             user_window = tk.Toplevel(self)
             user_window.title("Lista de Frases")
-            user_window.geometry("600x450")
+            user_window.after(0, lambda: user_window.state('zoomed'))
             user_window.configure(bg="#212121")
 
             button_add = customtkinter.CTkButton(

@@ -49,7 +49,6 @@ class Emails(customtkinter.CTk):
                             "Sucesso", f"Email de envio cadastrado com sucesso")
 
                     except sqlite3.Error as e:
-                        print("aqui")
                         print("SQLite error:", e)
 
         def populate_entries():
