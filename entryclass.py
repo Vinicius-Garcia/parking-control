@@ -211,11 +211,12 @@ class Entry(customtkinter.CTk):
         details_label.pack(pady=6, padx=10, anchor="w")
 
         plate_entry.insert(0, selected_entry)
+        print(veiculo)
         try:
             conn = sqlite3.connect('user_data.db')
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min,segunda_faixa, segunda_faixa_min FROM price LIMIT 1")
+                "SELECT carencia, primeira_faixa, demais_faixas, primeira_faixa_min, demais_faixas_min,segunda_faixa, segunda_faixa_min FROM price WHERE veiculo=?",(veiculo,))
             price_row = cursor.fetchone()
             cursor.close()
         except sqlite3.Error as e:
@@ -223,7 +224,6 @@ class Entry(customtkinter.CTk):
             price_row = None
 
         tempo_str = str(time_difference)
-
         carencia = int(price_row[0]) if price_row else 0
         primeira_faixa = float(price_row[1]) if price_row else 0.0
         demais_faixas = int(price_row[2]) if price_row else 0

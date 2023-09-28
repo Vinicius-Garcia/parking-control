@@ -19,27 +19,6 @@ class Login(customtkinter.CTk):
         self.mainloop()
 
     def setup_ui(self):
-        conn = sqlite3.connect('user_data.db')
-        cursor = conn.cursor()
-
-        cursor.execute('''CREATE TABLE IF NOT EXISTS price (
-                                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                   carencia TEXT,
-                                                   primeira_faixa TEXT,
-                                                   primeira_faixa_min TEXT,
-                                                   segunda_faixa TEXT,
-                                                   segunda_faixa_min TEXT,
-                                                   demais_faixas TEXT,
-                                                   demais_faixas_min TEXT
-                                               )''')
-
-        cursor.execute(
-            "INSERT INTO price (carencia, primeira_faixa, primeira_faixa_min, segunda_faixa, segunda_faixa_min, demais_faixas, demais_faixas_min) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (
-                10, 10, 10, 10,
-                10, 10, 10,))
-        conn.commit()
-        cursor.close()
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
 
@@ -76,8 +55,10 @@ class Login(customtkinter.CTk):
 
         if user:
             user_type = user[4]
+            self.entry1.delete(0, 'end')  # Limpa o campo de usuário
+            self.entry2.delete(0, 'end')  # Limpa o campo de senha
             Menu(user_type, user)
-           # self.destroy()  # Fecha a janela de login
+
         else:
             messagebox.showerror("Erro no Login",
                                  "Usuário ou Senha incorreto.")
