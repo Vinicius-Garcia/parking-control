@@ -84,7 +84,7 @@ class Report(customtkinter.CTk):
         self.totaldeposito_label = customtkinter.CTkLabel(self.total_frame, text="Total de Depósito: R$0.00", font=('Roboto', 12))
         self.totaldeposito_label.pack(padx=10, pady=10, side="left")
 
-        self.totalsaque_label = customtkinter.CTkLabel(self.total_frame, text="Total de Depósito: R$0.00", font=('Roboto', 12))
+        self.totalsaque_label = customtkinter.CTkLabel(self.total_frame, text="Total de Saque: R$0.00", font=('Roboto', 12))
         self.totalsaque_label.pack(padx=10, pady=10, side="left")
 
         self.total_label_caixa = customtkinter.CTkLabel(self.total_frame, text="Total de Caixa: R$0.00", font=('Roboto', 12))
