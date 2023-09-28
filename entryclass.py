@@ -76,11 +76,12 @@ class Entry(customtkinter.CTk):
         self.treeScroll = tk.Scrollbar(master=fr)
         self.treeScroll.configure(command=self.tree.yview)
         self.tree.configure(yscrollcommand=self.treeScroll.set)
-        self.treeScroll.pack(side='right', fill='y')  # Change side to 'right' and fill to 'y'
+        self.treeScroll.pack(side='right', fill='y')
         self.tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
         self.treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
+        self.tree.tag_configure("custom_font", font=("Roboto", 12))
 
-        # Call the function to update the Listbox with existing entries
+
         self.update_entry_list()
 
         self.tree.bind("<Double-1>", self.open_entry_details_list)
@@ -621,7 +622,7 @@ class Entry(customtkinter.CTk):
                 cursor.close()
                 for entry in entries:
                     entry_str = f"Placa: {entry[0]} - Data: {entry[1]} - Veiculo: {entry[2]}"
-                    self.tree.insert('', tk.END, values=(entry[0], entry[1], entry[2]))
+                    self.tree.insert('', tk.END, values=(entry[0], entry[1], entry[2]), tags=("custom_font",))
 
 
             except sqlite3.Error as e:
