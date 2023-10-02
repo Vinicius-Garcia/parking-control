@@ -4,7 +4,7 @@ import customtkinter
 import sqlite3
 from datetime import datetime
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import locale
 import qrcode
 from PIL import Image as pil_image, ImageWin as pil_image_win, ImageTk
@@ -60,8 +60,11 @@ class Entry(customtkinter.CTk):
                                               command=self.send_entry)
         self.button.pack(pady=12, padx=10, side="left")
 
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=150)
+
         self.tree = tk.ttk.Treeview(master=fr,
-                               columns=("Placa", "Data de Entrada", "Veículo"), selectmode="browse")
+                               columns=("Placa", "Data de Entrada", "Veículo"), selectmode="browse", style="Treeview")
 
         self.tree['show'] = 'headings'
         self.tree.heading("#1", text="Placa")
@@ -79,7 +82,7 @@ class Entry(customtkinter.CTk):
         self.treeScroll.pack(side='right', fill='y')
         self.tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
         self.treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
-        self.tree.tag_configure("custom_font", font=("Roboto", 12))
+        self.tree.tag_configure("custom_font", font=("Roboto", 18))
 
 
         self.update_entry_list()
