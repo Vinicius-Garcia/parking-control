@@ -67,8 +67,5 @@ class Menu(customtkinter.CTk):
     def logout(self):
         self.destroy()
 
-
-
-
 if __name__ == "__main__":
     app = Menu()
