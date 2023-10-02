@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from loginscreen import Login
 import sqlite3
+import db_helper
 
 conn = sqlite3.connect('user_data.db')
 cursor = conn.cursor()
