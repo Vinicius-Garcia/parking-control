@@ -42,19 +42,12 @@ class Menu(customtkinter.CTk):
                                           command=self.logout)
         button6.pack(pady=12, padx=10)
 
-
-
-
-
-    # Funções para os botões
-
     def open_entrada(self):
         Entry(self.user)
 
-
-
     def open_actions(self):
         Actions()
+
     def open_saida(self):
         Exit(self.user)
 
