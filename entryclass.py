@@ -12,6 +12,10 @@ import win32print
 import win32ui
 import win32con as wcon
 
+from tkinter import *
+from tkinter import ttk
+
+
 
 def validate_length(P):
     if len(P) <= 7:
@@ -33,8 +37,12 @@ class Entry(customtkinter.CTk):
         self.setup_ui()
         self.mainloop()
     def setup_ui(self):
+
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
+        style = ttk.Style(master=fr)
+        style.configure('Treeview', background='white', foreground='black', font=('Roboto', 18, 'normal', 'roman'),
+                        rowheight=30)
 
         self.label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="CONTROLE DE ACESSO", font=("Roboto", 24))
         self.label.pack(pady=12, padx=10)
@@ -60,7 +68,7 @@ class Entry(customtkinter.CTk):
                                               command=self.send_entry)
         self.button.pack(pady=12, padx=10, side="left")
 
-        self.tree = tk.ttk.Treeview(master=fr,
+        self.tree = ttk.Treeview(master=fr, height=60,
                                columns=("Placa", "Data de Entrada", "Veículo"), selectmode="browse")
 
         self.tree['show'] = 'headings'
@@ -79,8 +87,6 @@ class Entry(customtkinter.CTk):
         self.treeScroll.pack(side='right', fill='y')
         self.tree.pack(side='left', fill='both', expand=True, padx=(10, 0), pady=10)
         self.treeScroll.pack(side='right', fill='y', padx=(0, 10), pady=10)
-        self.tree.tag_configure("custom_font", font=("Roboto", 12))
-
 
         self.update_entry_list()
 
@@ -620,9 +626,11 @@ class Entry(customtkinter.CTk):
                 self.tree.delete(*self.tree.get_children())
                 # listbox.delete(0, tk.END)  # Clear the current list
                 cursor.close()
+
                 for entry in entries:
                     entry_str = f"Placa: {entry[0]} - Data: {entry[1]} - Veiculo: {entry[2]}"
-                    self.tree.insert('', tk.END, values=(entry[0], entry[1], entry[2]), tags=("custom_font",))
+                    self.tree.insert('', tk.END, values=(entry[0], entry[1], entry[2]))
+
 
 
             except sqlite3.Error as e:
@@ -637,6 +645,7 @@ class Entry(customtkinter.CTk):
     def set_focus(self):
         self.entry1.focus_set()
         self.after(100, self.set_focus)
+
     def handle_listbox_click(self):
             selected_indices = self.listbox.curselection()
             if selected_indices:

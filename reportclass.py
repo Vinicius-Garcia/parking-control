@@ -43,6 +43,9 @@ class Report(customtkinter.CTk):
     def setup_ui(self):
         fr = customtkinter.CTkFrame(master=self)
         fr.pack(pady=40, padx=120, fill="both", expand=True)
+        style = ttk.Style(master=fr)
+        style.configure('Treeview', background='white', foreground='black', font=('Roboto', 18, 'normal', 'roman'),
+                        rowheight=30)
 
         label = customtkinter.CTkLabel(master=fr, width=120, height=32, text="RELATÓRIO", font=("Roboto", 16))
         label.pack(pady=2, padx=10)
